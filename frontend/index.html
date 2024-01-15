@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <link rel="stylesheet" href="style.css" />
+    <title>Sveio</title>
+  </head>
+  <body>
+    <aside>
+      <header>
+        <section>
+          <h1>Sveio</h1>
+        </section>
+        <h3>Locate</h3>
+        <h2>Get ready...</h2>
+        <progress value="20" max="100"></progress>
+      </header>
+
+      <footer>
+        <a href="https://github.com/Erb3/Sveio">Source</a>
+        <span>-</span>
+        <a href="https://github.com/Erb3">Erb3</a>
+      </footer>
+    </aside>
+
+    <main>
+      <div id="map"></div>
+    </main>
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="https://cdn.socket.io/4.7.3/socket.io.min.js"></script>
+    <script defer src="script.js"></script>
+  </body>
+</html>

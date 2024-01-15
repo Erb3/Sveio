@@ -1,0 +1,88 @@
+:root {
+  --background: #1d2125;
+  --text: #b6c2cf;
+  --raised: #282d33;
+  --green: #10c97a;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background);
+  color: var(--text);
+  display: flex;
+}
+
+html,
+main,
+body,
+#map {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+aside {
+  width: 350px;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+}
+
+header > * {
+  margin: 0;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  justify-content: normal;
+}
+
+section {
+  background-color: var(--raised);
+  font-size: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  margin-bottom: 5vh;
+  width: 100%;
+}
+
+h3 {
+  font-size: 24px;
+  font-weight: 400;
+  display: none;
+}
+
+h2 {
+  font-size: 30px;
+  font-weight: 500;
+  margin-bottom: 3vh;
+  white-space: nowrap;
+}
+
+footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+footer > * {
+  margin: 4px;
+}
+
+a {
+  color: var(--text);
+}
+
+#map {
+  cursor: crosshair;
+}
+
+#map.cant {
+  cursor: grab;
+}
