@@ -11,10 +11,14 @@ Here are some resources to get you started with socketioxide:
 - [I never thought I'd use Socket.Io again](https://www.youtube.com/watch?v=HEhhWL1oUTM)
 - The examples
 
-### Testing the connection
+## Todo
 
-You can use it with the socket.io-cli from npm.
+- Improved markers
+- Leaderboard
+- Usernames
 
-```shell
-socketio ws://127.0.0.1:3000
-```
+## Credits
+
+- [Posio](https://github.com/abrenaut/posio) by [abrenaut](https://github.com/abrenaut)
+- [Base country and capitals database](https://gist.github.com/ofou/df09a6834a8421b4f376c875194915c9) by [ofou](https://github.com/ofou)
+- [Leaflet.js](https://leafletjs.com/)

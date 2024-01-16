@@ -1,7 +1,7 @@
 const targetElement = document.querySelector('h2');
 const locateElement = document.querySelector('h3');
 const progressElement = document.querySelector('progress');
-const mapElement = document.querySelector('.map');
+const mapElement = document.querySelector('#map');
 const socket = io();
 
 function createMarkerIcon(color) {
@@ -18,6 +18,7 @@ function createMarkerIcon(color) {
 }
 
 const greenMarker = createMarkerIcon('green');
+const blueMarker = createMarkerIcon('blue');
 
 const map = L.map('map', {
   center: [43.5, 10],
@@ -45,11 +46,17 @@ const mySelectionMarker = L.marker([0, 0]);
 const goalMarker = L.marker([0, 0], { icon: greenMarker });
 const distanceLine = L.polyline([], { color: 'red' });
 const distancePopup = L.popup();
+const otherPlayerMarkers = [];
 let canMoveMarker = false;
 
 map.on('click', (e) => {
   if (!canMoveMarker) return;
   mySelectionMarker.setLatLng(e.latlng).addTo(map);
+  console.log('Emitting', e.latlng);
+  socket.emit('guess', {
+    lat: e.latlng.lat,
+    long: e.latlng.lng,
+  });
 });
 
 socket.on('newTarget', (data) => {
@@ -57,6 +64,11 @@ socket.on('newTarget', (data) => {
   mySelectionMarker.remove();
   goalMarker.remove();
   distancePopup.remove();
+
+  otherPlayerMarkers.forEach((marker) => {
+    marker.remove();
+  });
+
   locateElement.style.display = 'unset';
   targetElement.innerHTML = `${data.capital}, ${data.country}`;
   canMoveMarker = true;
@@ -66,18 +78,25 @@ socket.on('newTarget', (data) => {
 
 socket.on('solution', (data) => {
   console.log('received solution :) ', data);
-  goalMarker.setLatLng([data.Latitude, data.Longitude]).addTo(map);
+  const goalCoords = [data.location.Latitude, data.location.Longitude];
+  goalMarker.setLatLng(goalCoords).addTo(map);
   locateElement.style.display = 'none';
   targetElement.innerHTML = 'Get ready...';
 
   if (map.hasLayer(mySelectionMarker)) {
-    const coords = [mySelectionMarker.getLatLng(), [data.Latitude, data.Longitude]];
+    const coords = [mySelectionMarker.getLatLng(), goalCoords];
     distanceLine.setLatLngs(coords).addTo(map);
     map.fitBounds(distanceLine.getBounds());
 
-    const distance = Math.round(map.distance(mySelectionMarker.getLatLng(), [data.Latitude, data.Longitude]) / 1000);
-    distancePopup.setLatLng([data.Latitude, data.Longitude]).setContent(`Distance: ${distance} km`);
+    const distance = Math.round(map.distance(mySelectionMarker.getLatLng(), goalCoords) / 1000);
+    distancePopup.setLatLng(goalCoords).setContent(`Distance: ${distance} km`);
     goalMarker.bindPopup(distancePopup).openPopup();
+  }
+
+  for (const [sid, guess] of Object.entries(data.guesses)) {
+    if (sid === socket.id) continue;
+    console.log('Adding someone elses marker', guess, data.guesses, sid);
+    otherPlayerMarkers.push(L.marker([guess.lat, guess.long], { icon: blueMarker }).addTo(map));
   }
 
   canMoveMarker = false;
