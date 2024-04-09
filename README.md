@@ -1,6 +1,13 @@
 # Sveio
 
-A geography game inspired by [Posio](https://github.com/abrenaut/posio), written in Rust.
+A geography game inspired by [Posio](https://github.com/abrenaut/posio), written in 🔥🚀Rust.
+
+## Configuration
+
+The server uses the following environmental variables, and it also parses the .env file if present:
+- `SVEIO_PORT`: The port to serve on. Defaults to `8085`.
+
+There is an example env file, see [`.env.example`](https://github.com/Erb3/sveio/blob/main/.env.example)
 
 ## Socket.io
 
@@ -10,12 +17,6 @@ Here are some resources to get you started with socketioxide:
 
 - [I never thought I'd use Socket.Io again](https://www.youtube.com/watch?v=HEhhWL1oUTM)
 - The examples
-
-## Todo
-
-- Improved markers
-- Leaderboard
-- Usernames
 
 ## Credits
 

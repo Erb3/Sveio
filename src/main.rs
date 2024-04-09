@@ -6,6 +6,7 @@ use socketioxide::extract::{Data, SocketRef, State};
 use socketioxide::{SocketIo, SocketIoBuilder};
 use std::time::Duration;
 use axum::http::Method;
+use dotenvy::dotenv;
 use socketioxide::socket::Sid;
 use tokio::time;
 use tower::ServiceBuilder;
@@ -62,6 +63,8 @@ fn on_connect(socket: SocketRef) {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing::subscriber::set_global_default(FmtSubscriber::default())?;
     info!("👋 Sveio says hi!");
+    info!("👋 Loading environment variables!");
+    let _ = dotenv();
     info!("⏳ Loading capitals!");
 
     let mut capitals_csv =
@@ -97,7 +100,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     info!("⏳ Starting HTTP server");
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", std::env::var("SVEIO_PORT").unwrap_or("8085".to_string())))
+        .await
+        .unwrap();
+
+    info!("✅ Listening on {}", listener.local_addr().unwrap());
     axum::serve(listener, app).await.unwrap();
     Ok(())
 }
@@ -120,7 +127,7 @@ async fn game_loop(capitals: Vec<Capital>, io: SocketIo, guesses: EncapsulatedGu
 
         interval.tick().await;
 
-        let mut capital: &Capital = capitals
+        let capital: &Capital = capitals
             .get(thread_rng().gen_range(0..capitals.len()))
             .unwrap();
         let anonymized_target = AnonymizedCapital {
