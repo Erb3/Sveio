@@ -19,9 +19,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Log in to the Container registry
-        uses: SeptBlast/docker-login@v1.1.2
+        uses: docker/login-action@3
         with:
-          login-server: ${{ env.REGISTRY }}
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
