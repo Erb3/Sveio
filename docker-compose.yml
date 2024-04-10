@@ -1,0 +1,9 @@
+services:
+  sveio:
+    container_name: sveio
+    image: ghcr.io/erb3/sveio:main
+    ports:
+      - 8085:8085
+    restart: unless-stopped
+    env_file:
+      - .env
