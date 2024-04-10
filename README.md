@@ -2,6 +2,28 @@
 
 A geography game inspired by [Posio](https://github.com/abrenaut/posio), written in 🔥🚀Rust.
 
+## Deployment
+
+Sveio is available as a docker image. If you use `docker run` you can run the following to start it:
+
+```bash
+docker run -d -p 8085:8085 --env-file=.env ghcr.io/erb3/sveio:main
+```
+
+Alternatively, you can use the following docker compose:
+
+```yml
+services:
+  sveio:
+    container_name: sveio
+    image: ghcr.io/erb3/sveio:main
+    ports:
+      - 8085:8085
+    restart: unless-stopped
+    env_file:
+      - .env
+```
+
 ## Configuration
 
 The server uses the following environmental variables, and it also parses the .env file if present:
