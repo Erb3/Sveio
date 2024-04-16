@@ -27,6 +27,7 @@ services:
 ## Configuration
 
 The server uses the following environmental variables, and it also parses the .env file if present:
+
 - `SVEIO_PORT`: The port to serve on. Defaults to `8085`.
 
 There is an example env file, see [`.env.example`](https://github.com/Erb3/sveio/blob/main/.env.example)
