@@ -1,13 +1,13 @@
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use axum::http::Method;
+use dotenvy::dotenv;
 use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
 use socketioxide::extract::{Data, SocketRef, State};
-use socketioxide::{SocketIo, SocketIoBuilder};
-use std::time::Duration;
-use axum::http::Method;
-use dotenvy::dotenv;
 use socketioxide::socket::Sid;
+use socketioxide::{SocketIo, SocketIoBuilder};
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
+use std::time::Duration;
 use tokio::time;
 use tower::ServiceBuilder;
 use tower_http::cors::{Any, CorsLayer};
@@ -44,7 +44,7 @@ type EncapsulatedGuesses = Arc<Mutex<Guesses>>;
 #[derive(Serialize)]
 struct Solution {
     location: Capital,
-    guesses: Guesses
+    guesses: Guesses,
 }
 
 fn on_connect(socket: SocketRef) {
@@ -71,25 +71,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         csv::Reader::from_path("./capitals.csv").expect("Unable to read and parse capitals");
     let capitals: Vec<Capital> = capitals_csv
         .deserialize()
-        .into_iter()
         .map(|field| field.unwrap())
         .collect();
 
     info!("✨ Loaded {} capitals", capitals.len());
 
     let state = Arc::new(Mutex::new(Guesses::new()));
-    let (socketio_layer, io) =
-        SocketIoBuilder::new()
-            .with_state(Arc::clone(&state))
-            .build_layer();
+    let (socketio_layer, io) = SocketIoBuilder::new()
+        .with_state(Arc::clone(&state))
+        .build_layer();
 
     io.ns("/", on_connect);
 
     let app = axum::Router::new()
         .nest_service("/", ServeDir::new("frontend"))
-        .layer(ServiceBuilder::new()
-            .layer(CorsLayer::new().allow_methods([Method::GET]).allow_origin(Any))
-            .layer(socketio_layer)
+        .layer(
+            ServiceBuilder::new()
+                .layer(
+                    CorsLayer::new()
+                        .allow_methods([Method::GET])
+                        .allow_origin(Any),
+                )
+                .layer(socketio_layer),
         );
 
     info!("🎮 Starting game loop");
@@ -100,9 +103,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     info!("⏳ Starting HTTP server");
 
-    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", std::env::var("SVEIO_PORT").unwrap_or("8085".to_string())))
-        .await
-        .unwrap();
+    let listener = tokio::net::TcpListener::bind(format!(
+        "0.0.0.0:{}",
+        std::env::var("SVEIO_PORT").unwrap_or("8085".to_string())
+    ))
+    .await
+    .unwrap();
 
     info!("✅ Listening on {}", listener.local_addr().unwrap());
     axum::serve(listener, app).await.unwrap();
@@ -119,7 +125,7 @@ async fn game_loop(capitals: Vec<Capital>, io: SocketIo, guesses: EncapsulatedGu
         if let Some(capital) = last_capital.cloned() {
             let solution = Solution {
                 location: capital,
-                guesses: guesses.lock().unwrap().clone()
+                guesses: guesses.lock().unwrap().clone(),
             };
             io.emit("solution", solution)
                 .expect("Unable to broadcast solution");
