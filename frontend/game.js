@@ -1,6 +1,5 @@
-const targetElement = document.querySelector('h2');
-const locateElement = document.querySelector('h3');
-const progressElement = document.querySelector('progress');
+const targetElement = document.querySelector('nav > p');
+const progressElement = document.querySelector('.progress > div');
 const mapElement = document.querySelector('#map');
 const socket = io();
 
@@ -69,8 +68,9 @@ socket.on('newTarget', (data) => {
     marker.remove();
   });
 
-  locateElement.style.display = 'unset';
   targetElement.innerHTML = `${data.capital}, ${data.country}`;
+  progressElement.style.width = '100%';
+  progressElement.style.transitionDuration = '5s';
   canMoveMarker = true;
   mapElement.classList.remove('cursor-grab');
   map.setZoom(3);
@@ -80,8 +80,9 @@ socket.on('solution', (data) => {
   console.log('received solution :) ', data);
   const goalCoords = [data.location.Latitude, data.location.Longitude];
   goalMarker.setLatLng(goalCoords).addTo(map);
-  locateElement.style.display = 'none';
-  targetElement.innerHTML = 'Get ready...';
+  targetElement.innerHTML = 'The target location will appear here';
+  progressElement.style.width = '0%';
+  progressElement.style.transitionDuration = '1s';
 
   if (map.hasLayer(mySelectionMarker)) {
     const coords = [mySelectionMarker.getLatLng(), goalCoords];

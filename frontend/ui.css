@@ -17,6 +17,7 @@
 /* "Real" css  */
 :root {
   --background: #17181c;
+  --container: #272930;
   --primary: #b3c7ff;
   --primary-active: #799bf7;
   --text: white;
