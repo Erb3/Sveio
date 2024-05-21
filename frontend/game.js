@@ -6,8 +6,8 @@ const socket = io();
 
 function createMarkerIcon(color) {
   return L.icon({
-    iconUrl: 'marker-icon-' + color + '.png',
-    shadowUrl: 'marker-shadow.png',
+    iconUrl: '/static/assets/marker-icon-' + color + '.png',
+    shadowUrl: '/static/assets/marker-shadow.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
@@ -72,7 +72,7 @@ socket.on('newTarget', (data) => {
   locateElement.style.display = 'unset';
   targetElement.innerHTML = `${data.capital}, ${data.country}`;
   canMoveMarker = true;
-  mapElement.classList.remove('cant');
+  mapElement.classList.remove('cursor-grab');
   map.setZoom(3);
 });
 
@@ -100,5 +100,5 @@ socket.on('solution', (data) => {
   }
 
   canMoveMarker = false;
-  mapElement.classList.add('cant');
+  mapElement.classList.add('cursor-grab');
 });

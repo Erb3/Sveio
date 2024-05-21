@@ -1,0 +1,85 @@
+/* Knockoff tailwindcss (to reduce bundle size) (no build tools!) */
+.flex {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1vw;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* "Real" css  */
+:root {
+  --background: #17181c;
+  --primary: #b3c7ff;
+  --primary-active: #799bf7;
+  --text: white;
+}
+
+* {
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+main {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: 'slnt' 0;
+}
+
+main {
+  background-color: var(--background);
+  color: var(--text);
+  width: 100%;
+}
+
+a {
+  color: var(--primary);
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: var(--primary-active);
+}
+
+a.button {
+  background-color: var(--primary);
+  color: var(--background);
+  font-size: 1rem;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  border-radius: 999rem;
+  line-height: 1.1875;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+a.button:hover {
+  background-color: var(--primary-active);
+}
+
+h1 {
+  font-size: 4rem;
+  font-weight: 600;
+}
+
+h2 {
+  font-size: 1.3rem;
+  font-weight: 300;
+  margin-bottom: 3vh;
+}

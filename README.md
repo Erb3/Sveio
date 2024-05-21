@@ -38,7 +38,7 @@ Sveio uses [Socketioxide](https://github.com/Totodore/socketioxide)
 
 Here are some resources to get you started with socketioxide:
 
-- [I never thought I'd use Socket.Io again](https://www.youtube.com/watch?v=HEhhWL1oUTM)
+- [I never thought I'd use Socket.Io again](https://www.youtube.com/watch?v=HEhhWL1oUTM) by Dreams of Code
 - The examples
 
 ## Credits

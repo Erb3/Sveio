@@ -1,4 +1,6 @@
-use axum::http::Method;
+use axum::http::{HeaderMap, Method};
+use axum::response::IntoResponse;
+use axum::routing::get;
 use dotenvy::dotenv;
 use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
@@ -6,10 +8,10 @@ use socketioxide::extract::{Data, SocketRef, State};
 use socketioxide::socket::Sid;
 use socketioxide::{SocketIo, SocketIoBuilder};
 use std::collections::HashMap;
+use std::fs;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::time;
-use tower::ServiceBuilder;
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::services::ServeDir;
 use tracing::info;
@@ -59,6 +61,25 @@ fn on_connect(socket: SocketRef) {
     );
 }
 
+fn read_file(path: &str) -> String {
+    fs::read_to_string(path).expect("Should be able to read landing page into memory")
+}
+
+#[derive(Clone)]
+struct AppState {
+    landing_page_content: String,
+    game_page_content: String,
+}
+
+impl AppState {
+    fn get() -> AppState {
+        AppState {
+            landing_page_content: read_file("./frontend/landing.html"),
+            game_page_content: read_file("./frontend/game.html"),
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing::subscriber::set_global_default(FmtSubscriber::default())?;
@@ -76,29 +97,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     info!("✨ Loaded {} capitals", capitals.len());
 
-    let state = Arc::new(Mutex::new(Guesses::new()));
+    let socketio_state = Arc::new(Mutex::new(Guesses::new()));
     let (socketio_layer, io) = SocketIoBuilder::new()
-        .with_state(Arc::clone(&state))
+        .with_state(Arc::clone(&socketio_state))
         .build_layer();
 
     io.ns("/", on_connect);
 
     let app = axum::Router::new()
-        .nest_service("/", ServeDir::new("frontend"))
+        .route("/", get(landing_page))
+        .route("/game", get(game_page))
+        .with_state(AppState::get())
+        .nest_service("/static/", ServeDir::new("frontend"))
         .layer(
-            ServiceBuilder::new()
-                .layer(
-                    CorsLayer::new()
-                        .allow_methods([Method::GET])
-                        .allow_origin(Any),
-                )
-                .layer(socketio_layer),
-        );
+            CorsLayer::new()
+                .allow_methods([Method::GET])
+                .allow_origin(Any),
+        )
+        .layer(socketio_layer);
 
     info!("🎮 Starting game loop");
 
     tokio::spawn(async move {
-        game_loop(capitals, io, state).await;
+        game_loop(capitals, io, socketio_state).await;
     });
 
     info!("⏳ Starting HTTP server");
@@ -113,6 +134,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     info!("✅ Listening on {}", listener.local_addr().unwrap());
     axum::serve(listener, app).await.unwrap();
     Ok(())
+}
+
+async fn landing_page(
+    axum::extract::State(state): axum::extract::State<AppState>,
+) -> impl IntoResponse {
+    let mut headers = HeaderMap::new();
+    headers.insert("Content-Type", "text/html; charset=utf-8".parse().unwrap());
+    return (headers, state.landing_page_content);
+}
+
+async fn game_page(
+    axum::extract::State(state): axum::extract::State<AppState>,
+) -> impl IntoResponse {
+    let mut headers = HeaderMap::new();
+    headers.insert("Content-Type", "text/html; charset=utf-8".parse().unwrap());
+    return (headers, state.game_page_content);
 }
 
 async fn game_loop(capitals: Vec<Capital>, io: SocketIo, guesses: EncapsulatedGuesses) {

@@ -83,6 +83,6 @@ a {
   cursor: crosshair;
 }
 
-#map.cant {
+#map.cursor-grab {
   cursor: grab;
 }
