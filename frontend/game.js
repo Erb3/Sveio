@@ -1,12 +1,12 @@
-const targetElement = document.querySelector('nav > p');
-const progressElement = document.querySelector('.progress > div');
-const mapElement = document.querySelector('#map');
+const targetElement = document.querySelector("nav > p");
+const progressElement = document.querySelector(".progress > div");
+const mapElement = document.querySelector("#map");
 const socket = io();
 
 function createMarkerIcon(color) {
   return L.icon({
-    iconUrl: '/static/assets/marker-icon-' + color + '.png',
-    shadowUrl: '/static/assets/marker-shadow.png',
+    iconUrl: "/static/assets/marker-icon-" + color + ".png",
+    shadowUrl: "/static/assets/marker-shadow.png",
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
@@ -16,10 +16,10 @@ function createMarkerIcon(color) {
   });
 }
 
-const greenMarker = createMarkerIcon('green');
-const blueMarker = createMarkerIcon('blue');
+const greenMarker = createMarkerIcon("green");
+const blueMarker = createMarkerIcon("blue");
 
-const map = L.map('map', {
+const map = L.map("map", {
   center: [43.5, 10],
   minZoom: 3,
   maxZoom: 5,
@@ -35,30 +35,31 @@ const map = L.map('map', {
   doubleClickZoom: false,
 }).setView([51.505, -0.09], 13);
 
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution:
+    '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
 }).addTo(map);
 
 map.setZoom(3);
 
 const mySelectionMarker = L.marker([0, 0]);
 const goalMarker = L.marker([0, 0], { icon: greenMarker });
-const distanceLine = L.polyline([], { color: 'red' });
+const distanceLine = L.polyline([], { color: "red" });
 const distancePopup = L.popup();
 const otherPlayerMarkers = [];
 let canMoveMarker = false;
 
-map.on('click', (e) => {
+map.on("click", (e) => {
   if (!canMoveMarker) return;
   mySelectionMarker.setLatLng(e.latlng).addTo(map);
-  console.log('Emitting', e.latlng);
-  socket.emit('guess', {
+  console.log("Emitting", e.latlng);
+  socket.emit("guess", {
     lat: e.latlng.lat,
     long: e.latlng.lng,
   });
 });
 
-socket.on('newTarget', (data) => {
+socket.on("newTarget", (data) => {
   distanceLine.remove();
   mySelectionMarker.remove();
   goalMarker.remove();
@@ -68,38 +69,42 @@ socket.on('newTarget', (data) => {
     marker.remove();
   });
 
-  targetElement.innerHTML = `${data.capital}, ${data.country}`;
-  progressElement.style.width = '100%';
-  progressElement.style.transitionDuration = '5s';
+  targetElement.innerHTML = `${data.name}, ${data.country}`;
+  progressElement.style.width = "100%";
+  progressElement.style.transitionDuration = "5s";
   canMoveMarker = true;
-  mapElement.classList.remove('cursor-grab');
+  mapElement.classList.remove("cursor-grab");
   map.setZoom(3);
 });
 
-socket.on('solution', (data) => {
-  console.log('received solution :) ', data);
-  const goalCoords = [data.location.Latitude, data.location.Longitude];
+socket.on("solution", (data) => {
+  console.log("received solution :) ", data);
+  const goalCoords = [data.location.latitude, data.location.longitude];
   goalMarker.setLatLng(goalCoords).addTo(map);
-  targetElement.innerHTML = 'The target location will appear here';
-  progressElement.style.width = '0%';
-  progressElement.style.transitionDuration = '1s';
+  targetElement.innerHTML = "The target location will appear here";
+  progressElement.style.width = "0%";
+  progressElement.style.transitionDuration = "1s";
 
   if (map.hasLayer(mySelectionMarker)) {
     const coords = [mySelectionMarker.getLatLng(), goalCoords];
     distanceLine.setLatLngs(coords).addTo(map);
     map.fitBounds(distanceLine.getBounds());
 
-    const distance = Math.round(map.distance(mySelectionMarker.getLatLng(), goalCoords) / 1000);
+    const distance = Math.round(
+      map.distance(mySelectionMarker.getLatLng(), goalCoords) / 1000
+    );
     distancePopup.setLatLng(goalCoords).setContent(`Distance: ${distance} km`);
     goalMarker.bindPopup(distancePopup).openPopup();
   }
 
   for (const [sid, guess] of Object.entries(data.guesses)) {
     if (sid === socket.id) continue;
-    console.log('Adding someone elses marker', guess, data.guesses, sid);
-    otherPlayerMarkers.push(L.marker([guess.lat, guess.long], { icon: blueMarker }).addTo(map));
+    console.log("Adding someone elses marker", guess, data.guesses, sid);
+    otherPlayerMarkers.push(
+      L.marker([guess.lat, guess.long], { icon: blueMarker }).addTo(map)
+    );
   }
 
   canMoveMarker = false;
-  mapElement.classList.add('cursor-grab');
+  mapElement.classList.add("cursor-grab");
 });

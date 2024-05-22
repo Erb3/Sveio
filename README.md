@@ -44,5 +44,5 @@ Here are some resources to get you started with socketioxide:
 ## Credits
 
 - [Posio](https://github.com/abrenaut/posio) by [abrenaut](https://github.com/abrenaut)
-- [Base country and capitals database](https://gist.github.com/ofou/df09a6834a8421b4f376c875194915c9) by [ofou](https://github.com/ofou)
+- [JSON of cities](https://github.com/abrenaut/posio/blob/master/game/data/cities.json) by [abrenaur](https://github.com/abrenaut)
 - [Leaflet.js](https://leafletjs.com/)

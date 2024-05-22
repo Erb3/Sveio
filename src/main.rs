@@ -1,3 +1,4 @@
+mod datasource;
 use axum::http::{HeaderMap, Method};
 use axum::response::IntoResponse;
 use axum::routing::get;
@@ -18,23 +19,6 @@ use tracing::info;
 use tracing_subscriber::FmtSubscriber;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
-#[serde(rename_all = "PascalCase")]
-struct Capital {
-    country: String,
-    #[serde(rename = "Capital City")]
-    capital: String,
-    latitude: f32,
-    longitude: f32,
-    population: u64,
-}
-
-#[derive(Debug, Serialize)]
-struct AnonymizedCapital<'a> {
-    country: &'a str,
-    capital: &'a str,
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
 struct GuessMessage {
     lat: f32,
     long: f32,
@@ -45,7 +29,7 @@ type EncapsulatedGuesses = Arc<Mutex<Guesses>>;
 
 #[derive(Serialize)]
 struct Solution {
-    location: Capital,
+    location: datasource::City,
     guesses: Guesses,
 }
 
@@ -86,16 +70,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     info!("👋 Sveio says hi!");
     info!("👋 Loading environment variables!");
     let _ = dotenv();
-    info!("⏳ Loading capitals!");
 
-    let mut capitals_csv =
-        csv::Reader::from_path("./capitals.csv").expect("Unable to read and parse capitals");
-    let capitals: Vec<Capital> = capitals_csv
-        .deserialize()
-        .map(|field| field.unwrap())
-        .collect();
-
-    info!("✨ Loaded {} capitals", capitals.len());
+    info!("⏳ Loading cities!");
+    let cities = datasource::get_cities();
+    info!("✨ Loaded {} cities", cities.len());
 
     let socketio_state = Arc::new(Mutex::new(Guesses::new()));
     let (socketio_layer, io) = SocketIoBuilder::new()
@@ -119,7 +97,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     info!("🎮 Starting game loop");
 
     tokio::spawn(async move {
-        game_loop(capitals, io, socketio_state).await;
+        game_loop(cities, io, socketio_state).await;
     });
 
     info!("⏳ Starting HTTP server");
@@ -141,7 +119,7 @@ async fn landing_page(
 ) -> impl IntoResponse {
     let mut headers = HeaderMap::new();
     headers.insert("Content-Type", "text/html; charset=utf-8".parse().unwrap());
-    return (headers, state.landing_page_content);
+    (headers, state.landing_page_content)
 }
 
 async fn game_page(
@@ -149,19 +127,19 @@ async fn game_page(
 ) -> impl IntoResponse {
     let mut headers = HeaderMap::new();
     headers.insert("Content-Type", "text/html; charset=utf-8".parse().unwrap());
-    return (headers, state.game_page_content);
+    (headers, state.game_page_content)
 }
 
-async fn game_loop(capitals: Vec<Capital>, io: SocketIo, guesses: EncapsulatedGuesses) {
+async fn game_loop(cities: Vec<datasource::City>, io: SocketIo, guesses: EncapsulatedGuesses) {
     let mut interval = time::interval(Duration::from_secs(5));
-    let mut last_capital: Option<&Capital> = None;
+    let mut last_city: Option<&datasource::City> = None;
 
     loop {
         interval.tick().await;
 
-        if let Some(capital) = last_capital.cloned() {
+        if let Some(city) = last_city.cloned() {
             let solution = Solution {
-                location: capital,
+                location: city,
                 guesses: guesses.lock().unwrap().clone(),
             };
             io.emit("solution", solution)
@@ -170,19 +148,17 @@ async fn game_loop(capitals: Vec<Capital>, io: SocketIo, guesses: EncapsulatedGu
 
         interval.tick().await;
 
-        let capital: &Capital = capitals
-            .get(thread_rng().gen_range(0..capitals.len()))
-            .unwrap();
-        let anonymized_target = AnonymizedCapital {
-            capital: &capital.capital,
-            country: &capital.country,
+        let city: &datasource::City = cities.get(thread_rng().gen_range(0..cities.len())).unwrap();
+        let anonymized_target = datasource::AnonymizedCity {
+            name: &city.name,
+            country: &city.country,
         };
 
-        info!("New location: {}", capital.clone().country);
+        info!("New location: {}", city.clone().country);
         guesses.lock().unwrap().clear();
         io.emit("newTarget", anonymized_target)
             .expect("Unable to broadcast new target");
 
-        last_capital = Some(capital);
+        last_city = Some(city);
     }
 }
