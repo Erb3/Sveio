@@ -68,7 +68,7 @@ impl AppState {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing::subscriber::set_global_default(FmtSubscriber::default())?;
     info!("👋 Sveio says hi!");
-    info!("👋 Loading environment variables!");
+    info!("⚙️ Loading environment variables!");
     let _ = dotenv();
 
     info!("⏳ Loading cities!");
@@ -109,7 +109,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .await
     .unwrap();
 
-    info!("✅ Listening on {}", listener.local_addr().unwrap());
+    info!("✅ Listening on http://{}", listener.local_addr().unwrap());
     axum::serve(listener, app).await.unwrap();
     Ok(())
 }
