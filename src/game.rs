@@ -69,7 +69,7 @@ pub fn on_connect(socket: SocketRef) {
         |socket: SocketRef,
          Data::<GuessMessage>(data),
          game_state: State<EncapsulatedGameState>| {
-            info!("Received message: {:?}", data);
+            info!("📬 Received message: {:?}", data);
             game_state.lock().unwrap().guesses.insert(socket.id, data);
         },
     );
@@ -100,10 +100,11 @@ pub async fn game_loop(
                 let distance =
                     target.distance_to(&geoutils::Location::new(packet.lat, packet.long));
                 let points = utils::calculate_score(distance.unwrap().meters() / 1000.0);
-                let existing_player = state.leaderboard.get(&player.0).unwrap().to_owned();
-                state
-                    .leaderboard
-                    .insert(player.0, (existing_player.0, existing_player.1 + points));
+
+                if let Some(existing_player) = state.leaderboard.get(&player.0) {
+                    let p = existing_player.to_owned();
+                    state.leaderboard.insert(player.0, (p.0, p.1 + points));
+                }
             }
 
             let solution = SolutionPacket {
