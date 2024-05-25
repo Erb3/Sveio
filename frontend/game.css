@@ -1,9 +1,3 @@
-#map {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-}
-
 aside {
   width: 13vw;
   padding: 1vw;
@@ -19,58 +13,11 @@ aside {
   border: 2px solid black;
 }
 
-header > * {
-  margin: 0;
-}
-
-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  justify-content: normal;
-}
-
-section {
-  background-color: var(--raised);
-  font-size: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  margin-bottom: 5vh;
-  width: 100%;
-}
-
-h3 {
-  font-size: 24px;
-  font-weight: 400;
-  display: none;
-}
-
-h2 {
-  font-size: 30px;
-  font-weight: 500;
-  margin-bottom: 3vh;
-  white-space: nowrap;
-}
-
-footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-footer > * {
-  margin: 4px;
-}
-
-a {
-  color: var(--text);
-}
-
 #map {
   cursor: crosshair;
+  width: 100%;
+  height: 100%;
+  margin: 0;
 }
 
 #map.cursor-grab {

@@ -112,7 +112,6 @@ socket.on("solution", (data) => {
     .forEach(([, [username, points]], index) => {
       leaderboard.push(`${index + 1}. ${username} - ${points}`);
     });
-  console.log(leaderboard);
   leaderboardElement.innerHTML = leaderboard.join("<br>");
 
   canMoveMarker = false;
