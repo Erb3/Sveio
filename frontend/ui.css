@@ -39,12 +39,8 @@ main {
   font-optical-sizing: auto;
   font-style: normal;
   font-variation-settings: "slnt" 0;
-}
-
-main {
   background-color: var(--background);
   color: var(--text);
-  width: 100%;
 }
 
 a {

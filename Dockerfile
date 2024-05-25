@@ -39,6 +39,7 @@ WORKDIR /sveio
 COPY --from=builder /sveio/target/x86_64-unknown-linux-musl/release/sveio ./
 COPY --from=builder /sveio/cities.json ./
 COPY --from=builder /sveio/frontend ./frontend
+
 # Use an unprivileged user.
 USER sveio:sveio
 

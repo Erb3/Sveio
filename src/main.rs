@@ -1,5 +1,6 @@
 mod datasource;
 mod game;
+mod utils;
 use axum::http::{HeaderMap, Method};
 use axum::response::IntoResponse;
 use axum::routing::get;
@@ -42,7 +43,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cities = datasource::get_cities();
     info!("✨ Loaded {} cities", cities.len());
 
-    let socketio_state = Arc::new(Mutex::new(game::Guesses::new()));
+    let socketio_state = Arc::new(Mutex::new(game::GameState {
+        guesses: game::Guesses::new(),
+        leaderboard: game::Leaderboard::new(),
+    }));
+
     let (socketio_layer, io) = SocketIoBuilder::new()
         .with_state(Arc::clone(&socketio_state))
         .build_layer();

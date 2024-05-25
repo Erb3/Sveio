@@ -71,10 +71,16 @@
       </div>
     </main>
     <script defer>
+      document.querySelector("input").value = localStorage.getItem("username")
+
       document.querySelector("form").addEventListener("submit", (e) => {
         e.preventDefault();
-        location.href =
-          "/game?username=" + document.querySelector("input").value;
+        const username =
+          document.querySelector("input").value ||
+          `Player ${Math.floor(Math.random() * 9999)}`;
+
+        localStorage.setItem("username", username);
+        location.href = "/game";
       });
     </script>
   </body>

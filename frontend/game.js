@@ -1,6 +1,7 @@
 const targetElement = document.querySelector("nav > p");
 const progressElement = document.querySelector(".progress > div");
 const mapElement = document.querySelector("#map");
+const leaderboardElement = document.querySelector("#leaderboard");
 const socket = io();
 
 function createMarkerIcon(color) {
@@ -39,7 +40,7 @@ L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution:
     '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
 }).addTo(map);
-
+map.attributionControl.setPosition("bottomleft");
 map.setZoom(3);
 
 const mySelectionMarker = L.marker([0, 0]);
@@ -78,7 +79,6 @@ socket.on("newTarget", (data) => {
 });
 
 socket.on("solution", (data) => {
-  console.log("received solution :) ", data);
   const goalCoords = [data.location.latitude, data.location.longitude];
   goalMarker.setLatLng(goalCoords).addTo(map);
   targetElement.innerHTML = "The target location will appear here";
@@ -105,6 +105,21 @@ socket.on("solution", (data) => {
     );
   }
 
+  const leaderboard = [];
+  Object.entries(data.leaderboard)
+    .sort((a, b) => b[1][1] - a[1][1])
+    .slice(0, 10)
+    .forEach(([, [username, points]], index) => {
+      leaderboard.push(`${index + 1}. ${username} - ${points}`);
+    });
+  console.log(leaderboard);
+  leaderboardElement.innerHTML = leaderboard.join("<br>");
+
   canMoveMarker = false;
   mapElement.classList.add("cursor-grab");
+});
+
+socket.emit("join", {
+  username: localStorage.getItem("username"),
+  game: "PRIMARY",
 });
