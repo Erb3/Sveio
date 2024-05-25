@@ -1,6 +1,7 @@
 mod datasource;
 mod game;
 mod utils;
+use axum::handler::Handler;
 use axum::http::{HeaderMap, Method};
 use axum::response::IntoResponse;
 use axum::routing::get;
@@ -21,6 +22,7 @@ fn read_file(path: &str) -> String {
 struct AppState {
     landing_page_content: String,
     game_page_content: String,
+    not_found_page_content: String,
 }
 
 impl AppState {
@@ -28,6 +30,7 @@ impl AppState {
         AppState {
             landing_page_content: read_file("./frontend/landing.html"),
             game_page_content: read_file("./frontend/game.html"),
+            not_found_page_content: read_file("./frontend/404.html"),
         }
     }
 }
@@ -54,17 +57,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     io.ns("/", game::on_connect);
 
+    let state = AppState::get();
     let app = axum::Router::new()
         .route("/", get(landing_page))
         .route("/game", get(game_page))
-        .with_state(AppState::get())
-        .nest_service("/static/", ServeDir::new("frontend"))
+        .nest_service(
+            "/static/",
+            ServeDir::new("frontend")
+                .not_found_service(Handler::with_state(get(not_found_page), state.clone())),
+        )
+        .layer(socketio_layer)
+        .fallback(get(not_found_page))
         .layer(
             CorsLayer::new()
                 .allow_methods([Method::GET])
                 .allow_origin(Any),
         )
-        .layer(socketio_layer);
+        .with_state(state);
 
     info!("🎮 Starting game loop");
 
@@ -84,6 +93,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     info!("✅ Listening on http://{}", listener.local_addr().unwrap());
     axum::serve(listener, app).await.unwrap();
     Ok(())
+}
+
+async fn not_found_page(
+    axum::extract::State(state): axum::extract::State<AppState>,
+) -> impl IntoResponse {
+    let mut headers = HeaderMap::new();
+    headers.insert("Content-Type", "text/html; charset=utf-8".parse().unwrap());
+    (headers, state.not_found_page_content)
 }
 
 async fn landing_page(
