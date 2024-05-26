@@ -1,0 +1,15 @@
+edition = "2021"
+match_block_trailing_comma = true
+newline_style = "Unix"
+reorder_imports = true
+reorder_modules = true
+hard_tabs = true
+use_try_shorthand = true
+imports_granularity = "Module"
+wrap_comments = true
+unstable_features = true
+group_imports = "One"
+format_code_in_doc_comments = true
+format_macro_matchers = true
+format_macro_bodies = true
+format_strings = true
