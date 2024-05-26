@@ -15,10 +15,6 @@ use tower_http::services::ServeDir;
 use tracing::info;
 use tracing_subscriber::FmtSubscriber;
 
-fn read_file(path: &str) -> String {
-	fs::read_to_string(path).expect("Should be able to read landing page into memory")
-}
-
 #[derive(Clone)]
 struct AppState {
 	landing_page_content: String,
@@ -34,6 +30,10 @@ impl AppState {
 			not_found_page_content: read_file("./frontend/404.html"),
 		}
 	}
+}
+
+fn read_file(path: &str) -> String {
+	fs::read_to_string(path).expect("Should be able to read static page into memory")
 }
 
 #[tokio::main]
