@@ -2,13 +2,14 @@ mod datasource;
 mod game;
 mod utils;
 use axum::handler::Handler;
-use axum::http::{HeaderMap, Method};
+use axum::http::{HeaderMap, Method, StatusCode};
 use axum::response::IntoResponse;
 use axum::routing::get;
 use dotenvy::dotenv;
 use socketioxide::SocketIoBuilder;
 use std::fs;
 use std::sync::{Arc, Mutex};
+use tower::{Layer, ServiceBuilder};
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::services::ServeDir;
 use tracing::info;
@@ -61,16 +62,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = axum::Router::new()
         .route("/", get(landing_page))
         .route("/game", get(game_page))
-        .layer(socketio_layer)
+        .fallback(get(not_found_page))
         .nest_service(
             "/static/",
             ServeDir::new("frontend")
                 .not_found_service(Handler::with_state(get(not_found_page), state.clone())),
         )
         .layer(
-            CorsLayer::new()
-                .allow_methods([Method::GET])
-                .allow_origin(Any),
+            ServiceBuilder::new()
+                .layer(
+                    CorsLayer::new()
+                        .allow_methods([Method::GET])
+                        .allow_origin(Any),
+                )
+                .layer(socketio_layer),
         )
         .with_state(state);
 
@@ -99,7 +104,7 @@ async fn not_found_page(
 ) -> impl IntoResponse {
     let mut headers = HeaderMap::new();
     headers.insert("Content-Type", "text/html; charset=utf-8".parse().unwrap());
-    (headers, state.not_found_page_content)
+    (StatusCode::NOT_FOUND, headers, state.not_found_page_content)
 }
 
 async fn landing_page(
