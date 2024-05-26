@@ -20,6 +20,7 @@ struct AppState {
 	landing_page_content: String,
 	game_page_content: String,
 	not_found_page_content: String,
+	robots_txt_content: String,
 }
 
 impl AppState {
@@ -28,6 +29,7 @@ impl AppState {
 			landing_page_content: read_file("./frontend/landing.html"),
 			game_page_content: read_file("./frontend/game.html"),
 			not_found_page_content: read_file("./frontend/404.html"),
+			robots_txt_content: read_file("./frontend/robots.txt"),
 		}
 	}
 }
@@ -62,6 +64,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let app = axum::Router::new()
 		.route("/", get(landing_page))
 		.route("/game", get(game_page))
+		.route("/robots.txt", get(robots_page))
 		.fallback(get(not_found_page))
 		.nest_service(
 			"/static/",
@@ -121,4 +124,12 @@ async fn game_page(
 	let mut headers = HeaderMap::new();
 	headers.insert("Content-Type", "text/html; charset=utf-8".parse().unwrap());
 	(headers, state.game_page_content)
+}
+
+async fn robots_page(
+	axum::extract::State(state): axum::extract::State<AppState>,
+) -> impl IntoResponse {
+	let mut headers = HeaderMap::new();
+	headers.insert("Content-Type", "text/html; charset=utf-8".parse().unwrap());
+	(headers, state.robots_txt_content)
 }
