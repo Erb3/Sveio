@@ -61,13 +61,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = axum::Router::new()
         .route("/", get(landing_page))
         .route("/game", get(game_page))
+        .layer(socketio_layer)
         .nest_service(
             "/static/",
             ServeDir::new("frontend")
                 .not_found_service(Handler::with_state(get(not_found_page), state.clone())),
         )
-        .layer(socketio_layer)
-        .fallback(get(not_found_page))
         .layer(
             CorsLayer::new()
                 .allow_methods([Method::GET])
