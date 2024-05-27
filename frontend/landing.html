@@ -18,11 +18,11 @@
 
       input {
         border-radius: 999rem 0 0 999rem;
+        border: 1px solid white !important;
       }
 
       button {
         border-radius: 0 999rem 999rem 0 !important;
-        border: 1px solid var(--primary) !important;
       }
 
       form {
@@ -34,8 +34,8 @@
     <main class="flex flex-col">
       <h1>Sveio</h1>
       <h2>
-        A geography game by <a href="https://github.com/Erb3">Erb3</a> inspired
-        by <a href="https://github.com/abrenaut/posio">Posio</a>.
+        A geography game inspired by
+        <a href="https://github.com/abrenaut/posio">Posio</a>.
       </h2>
 
       <p class="text-center">
@@ -71,7 +71,7 @@
       </div>
     </main>
     <script defer>
-      document.querySelector("input").value = localStorage.getItem("username")
+      document.querySelector("input").value = localStorage.getItem("username");
 
       document.querySelector("form").addEventListener("submit", (e) => {
         e.preventDefault();

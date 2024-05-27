@@ -25,8 +25,13 @@ struct AppState {
 
 impl AppState {
 	fn get() -> AppState {
+		let mut landing = read_file("./frontend/landing.html");
+		if std::env::var("HIDE_VIEW_SOURCE_BUTTON").unwrap_or("false".to_string()) != "false" {
+			landing = landing.replace("View Code", "");
+		}
+
 		AppState {
-			landing_page_content: read_file("./frontend/landing.html"),
+			landing_page_content: landing,
 			game_page_content: read_file("./frontend/game.html"),
 			not_found_page_content: read_file("./frontend/404.html"),
 			robots_txt_content: read_file("./frontend/robots.txt"),

@@ -41,6 +41,7 @@ main {
   font-variation-settings: "slnt" 0;
   background-color: var(--background);
   color: var(--text);
+  overflow: hidden;
 }
 
 a {
@@ -72,13 +73,11 @@ a:hover {
 }
 
 input {
-  width: 12vw;
-  height: 6vh;
+  padding: 1rem 1.25rem;
   font-size: large;
   border-radius: 999rem;
   text-align: center;
   border: 0;
-  padding: 0;
 }
 
 h1 {
