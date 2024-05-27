@@ -1,7 +1,6 @@
 use crate::{datasource, utils};
 use geoutils::Location;
 use rand::{thread_rng, Rng};
-use socketioxide::extract::{Data, SocketRef, State};
 use serde::{Deserialize, Serialize};
 use socketioxide::socket::Sid;
 use socketioxide::SocketIo;
