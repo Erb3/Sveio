@@ -3,6 +3,7 @@ const progressElement = document.querySelector(".progress > div");
 const mapElement = document.querySelector("#map");
 const leaderboardElement = document.querySelector("#leaderboard");
 const socket = io();
+let targetAnnounced = false;
 
 function createMarkerIcon(color) {
   return L.icon({
@@ -61,6 +62,7 @@ map.on("click", (e) => {
 });
 
 socket.on("newTarget", (data) => {
+  targetAnnounced = true;
   distanceLine.remove();
   mySelectionMarker.remove();
   goalMarker.remove();
@@ -79,6 +81,8 @@ socket.on("newTarget", (data) => {
 });
 
 socket.on("solution", (data) => {
+  if (!targetAnnounced) return;
+
   const goalCoords = [data.location.latitude, data.location.longitude];
   goalMarker.setLatLng(goalCoords).addTo(map);
   targetElement.innerHTML = "The target location will appear here";
