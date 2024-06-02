@@ -1,4 +1,4 @@
-use crate::{datasource, utils};
+use crate::{datasource, packets, utils};
 use geoutils::Location;
 use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
@@ -11,23 +11,11 @@ use std::time::Duration;
 use tokio::time;
 use tracing::info;
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct GuessMessage {
-	lat: f32,
-	long: f32,
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-struct JoinMessage {
-	game: String,
-	username: String,
-}
-
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(transparent)]
 pub struct Username(String);
 
-pub type Guesses = HashMap<Sid, GuessMessage>;
+pub type Guesses = HashMap<Sid, packets::GuessMessage>;
 pub type Leaderboard = HashMap<Sid, (Username, u64)>;
 pub struct GameState {
 	pub guesses: Guesses,
@@ -35,19 +23,14 @@ pub struct GameState {
 }
 type EncapsulatedGameState = Arc<Mutex<GameState>>;
 
-#[derive(Serialize)]
-struct SolutionPacket {
-	location: datasource::City,
-	guesses: Guesses,
-	leaderboard: Leaderboard,
-}
-
 pub fn on_connect(socket: SocketRef) {
 	info!("🆕 Client connected with ID {}", socket.id);
 
 	socket.on(
 		"join",
-		|socket: SocketRef, Data::<JoinMessage>(data), state: State<EncapsulatedGameState>| {
+		|socket: SocketRef,
+		 Data::<packets::JoinMessage>(data),
+		 state: State<EncapsulatedGameState>| {
 			state
 				.lock()
 				.unwrap()
@@ -65,7 +48,7 @@ pub fn on_connect(socket: SocketRef) {
 	socket.on(
 		"guess",
 		|socket: SocketRef,
-		 Data::<GuessMessage>(data),
+		 Data::<packets::GuessMessage>(data),
 		 game_state: State<EncapsulatedGameState>| {
 			info!("📬 Received message: {:?}", data);
 			game_state.lock().unwrap().guesses.insert(socket.id, data);
@@ -105,7 +88,7 @@ pub async fn game_loop(
 				}
 			}
 
-			let solution = SolutionPacket {
+			let solution = packets::SolutionPacket {
 				location: city,
 				guesses: state.guesses.clone(),
 				leaderboard: state.leaderboard.clone(),
