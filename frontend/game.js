@@ -122,7 +122,15 @@ socket.on("solution", (data) => {
   mapElement.classList.add("cursor-grab");
 });
 
-socket.emit("join", {
-  username: localStorage.getItem("username"),
-  game: "PRIMARY",
+socket.on("join-response", (data) => {
+  if (!data.ok) {
+    location.href = "/?error=" + data.error;
+  }
+});
+
+socket.on("connect", () => {
+  socket.emit("join", {
+    username: localStorage.getItem("username"),
+    game: "PRIMARY",
+  });
 });

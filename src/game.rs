@@ -1,6 +1,7 @@
 use crate::{datasource, packets, utils};
 use geoutils::Location;
 use rand::{thread_rng, Rng};
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 use socketioxide::extract::{Data, SocketRef, State};
 use socketioxide::socket::Sid;
@@ -31,13 +32,38 @@ pub fn on_connect(socket: SocketRef) {
 		|socket: SocketRef,
 		 Data::<packets::JoinMessage>(data),
 		 state: State<EncapsulatedGameState>| {
+			let username_regex = Regex::new(r"^[A-Za-z0-9 _-]{1,32}$").unwrap();
+
+			if !username_regex.is_match(&data.username) {
+				socket
+					.emit(
+						"join-response",
+						packets::JoinResponsePacket {
+							ok: false,
+							error: Some("Bad username!".to_string()),
+						},
+					)
+					.unwrap();
+
+				socket.disconnect().unwrap();
+				return;
+			}
+
 			state
 				.lock()
 				.unwrap()
 				.leaderboard
 				.insert(socket.id, (Username(data.username.clone()), 0));
 
-			socket.emit("join-response", "{\"ok\": true}").unwrap();
+			socket
+				.emit(
+					"join-response",
+					packets::JoinResponsePacket {
+						ok: true,
+						error: None,
+					},
+				)
+				.unwrap();
 			info!(
 				"🪪  Client with ID {} set username to {}",
 				socket.id, data.username
