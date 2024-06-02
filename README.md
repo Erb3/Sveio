@@ -36,13 +36,13 @@ There is an example env file, see [`.env.example`](https://github.com/Erb3/sveio
 
 Sveio uses [Socketioxide](https://github.com/Totodore/socketioxide)
 
-Here are some resources to get you started with socketioxide:
+Here are some resources to get you started with Socketioxide:
 
 - [I never thought I'd use Socket.Io again](https://www.youtube.com/watch?v=HEhhWL1oUTM) by Dreams of Code
 - The examples
 
 ## Credits
 
-- [Posio](https://github.com/abrenaut/posio) by [abrenaut](https://github.com/abrenaut)
-- [JSON of cities](https://github.com/abrenaut/posio/blob/master/game/data/cities.json) by [abrenaur](https://github.com/abrenaut)
+- [Posio](https://github.com/abrenaut/posio) by [Abrenaut](https://github.com/abrenaut)
+- [JSON of cities](https://github.com/abrenaut/posio/blob/master/game/data/cities.json) by [Abrenaut](https://github.com/abrenaut)
 - [Leaflet.js](https://leafletjs.com/)
