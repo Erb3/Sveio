@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::fs;
+use tokio::fs;
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct City {
@@ -15,7 +15,9 @@ pub struct AnonymizedCity<'a> {
 	pub name: &'a str,
 }
 
-pub fn get_cities() -> Vec<City> {
-	let cities_str = fs::read_to_string("./cities.json").expect("Unable to read cities.json file.");
+pub async fn get_cities() -> Vec<City> {
+	let cities_str = fs::read_to_string("./cities.json")
+		.await
+		.expect("Unable to read cities.json file.");
 	serde_json::from_str(&cities_str).expect("cities.json does not have correct format.")
 }

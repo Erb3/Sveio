@@ -8,8 +8,8 @@ use axum::response::IntoResponse;
 use axum::routing::get;
 use dotenvy::dotenv;
 use socketioxide::SocketIoBuilder;
-use std::fs;
 use std::sync::{Arc, Mutex};
+use tokio::fs;
 use tower::ServiceBuilder;
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::services::ServeDir;
@@ -25,23 +25,25 @@ struct AppState {
 }
 
 impl AppState {
-	fn get() -> AppState {
-		let mut landing = read_file("./frontend/landing.html");
+	async fn get() -> AppState {
+		let mut landing = read_file("./frontend/landing.html").await;
 		if std::env::var("HIDE_VIEW_SOURCE_BUTTON").unwrap_or("false".to_string()) != "false" {
 			landing = landing.replace("View Code", "");
 		}
 
 		AppState {
 			landing_page_content: landing,
-			game_page_content: read_file("./frontend/game.html"),
-			not_found_page_content: read_file("./frontend/404.html"),
-			robots_txt_content: read_file("./frontend/robots.txt"),
+			game_page_content: read_file("./frontend/game.html").await,
+			not_found_page_content: read_file("./frontend/404.html").await,
+			robots_txt_content: read_file("./frontend/robots.txt").await,
 		}
 	}
 }
 
-fn read_file(path: &str) -> String {
-	fs::read_to_string(path).expect("Should be able to read static page into memory")
+async fn read_file(path: &str) -> String {
+	fs::read_to_string(path)
+		.await
+		.expect("Should be able to read static page into memory")
 }
 
 #[tokio::main]
@@ -52,7 +54,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let _ = dotenv();
 
 	info!("⏳ Loading cities!");
-	let cities = datasource::get_cities();
+	let cities = datasource::get_cities().await;
 	info!("✨ Loaded {} cities", cities.len());
 
 	let socketio_state = Arc::new(Mutex::new(game::GameState {
@@ -66,7 +68,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 	io.ns("/", game::on_connect);
 
-	let state = AppState::get();
+	let state = AppState::get().await;
 	let app = axum::Router::new()
 		.route("/", get(landing_page))
 		.route("/game", get(game_page))
