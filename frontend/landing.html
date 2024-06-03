@@ -28,9 +28,21 @@
       form {
         gap: 0 !important;
       }
+
+      .error {
+        width: 100%;
+        background-color: #ee4e4e;
+        color: white;
+        display: none;
+        text-align: center;
+        font-size: 1.5rem;
+      }
     </style>
   </head>
   <body>
+    <header>
+      <p class="error"></p>
+    </header>
     <main class="flex flex-col">
       <h1>Sveio</h1>
       <h2>
@@ -82,6 +94,13 @@
         localStorage.setItem("username", username);
         location.href = "/game";
       });
+
+      const params = new URLSearchParams(window.location.search);
+      const errorElement = document.querySelector(".error");
+      if (params.has("error")) {
+        errorElement.innerHTML = "Error: " + params.get("error");
+        errorElement.style.display = "block";
+      }
     </script>
   </body>
 </html>
