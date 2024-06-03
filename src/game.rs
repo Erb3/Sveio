@@ -86,6 +86,9 @@ pub fn on_connect(socket: SocketRef) {
 					},
 				)
 				.unwrap();
+
+			socket.join("PRIMARY").unwrap();
+
 			info!(
 				"🪪  Client with ID {} set username to {}",
 				socket.id, data.username
@@ -142,7 +145,8 @@ pub async fn game_loop(
 				leaderboard: state.leaderboard.clone(),
 			};
 
-			io.emit("solution", solution)
+			io.to("PRIMARY")
+				.emit("solution", solution)
 				.expect("Unable to broadcast solution");
 		}
 
@@ -156,7 +160,8 @@ pub async fn game_loop(
 
 		info!("📍 New location: {}, {}", &city.name, &city.country);
 		game_state.lock().unwrap().guesses.clear();
-		io.emit("newTarget", target_message)
+		io.to("PRIMARY")
+			.emit("newTarget", target_message)
 			.expect("Unable to broadcast new target");
 
 		last_city = Some(city);
