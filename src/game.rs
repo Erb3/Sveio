@@ -40,7 +40,29 @@ pub fn on_connect(socket: SocketRef) {
 						"join-response",
 						packets::JoinResponsePacket {
 							ok: false,
-							error: Some("Bad username!".to_string()),
+							error: Some("Bad username".to_string()),
+						},
+					)
+					.unwrap();
+
+				socket.disconnect().unwrap();
+				return;
+			}
+
+			if state
+				.lock()
+				.unwrap()
+				.leaderboard
+				.clone()
+				.into_iter()
+				.any(|v| v.1 .0 .0 == data.username)
+			{
+				socket
+					.emit(
+						"join-response",
+						packets::JoinResponsePacket {
+							ok: false,
+							error: Some("Username taken".to_string()),
 						},
 					)
 					.unwrap();
