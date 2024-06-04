@@ -113,8 +113,8 @@ socket.on("solution", (data) => {
   Object.entries(data.leaderboard)
     .sort((a, b) => b[1][1] - a[1][1])
     .slice(0, 10)
-    .forEach(([, [username, points]], index) => {
-      leaderboard.push(`${index + 1}. ${username} - ${points}`);
+    .forEach(([, { username, score }], index) => {
+      leaderboard.push(`${index + 1}. ${username} - ${score}`);
     });
   leaderboardElement.innerHTML = leaderboard.join("<br>");
 

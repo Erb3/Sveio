@@ -16,11 +16,18 @@ use tracing::info;
 #[serde(transparent)]
 pub struct Username(String);
 
+#[derive(Serialize, Debug, Clone)]
+pub struct Player {
+	pub username: Username,
+	pub score: u64,
+}
+
 pub type Guesses = HashMap<Sid, packets::GuessMessage>;
-pub type Leaderboard = HashMap<Sid, (Username, u64)>;
+pub type PlayerMap = HashMap<Sid, Player>;
+
 pub struct GameState {
 	pub guesses: Guesses,
-	pub leaderboard: Leaderboard,
+	pub leaderboard: PlayerMap,
 }
 type EncapsulatedGameState = Arc<Mutex<GameState>>;
 
@@ -55,7 +62,7 @@ pub fn on_connect(socket: SocketRef) {
 				.leaderboard
 				.clone()
 				.into_iter()
-				.any(|v| v.1 .0 .0 == data.username)
+				.any(|v| v.1.username.0 == data.username)
 			{
 				socket
 					.emit(
@@ -71,11 +78,13 @@ pub fn on_connect(socket: SocketRef) {
 				return;
 			}
 
-			state
-				.lock()
-				.unwrap()
-				.leaderboard
-				.insert(socket.id, (Username(data.username.clone()), 0));
+			state.lock().unwrap().leaderboard.insert(
+				socket.id,
+				Player {
+					username: Username(data.username.clone()),
+					score: 0,
+				},
+			);
 
 			socket
 				.emit(
@@ -127,15 +136,16 @@ pub async fn game_loop(
 			let mut state = game_state.lock().unwrap();
 			let target = Location::new(city.latitude, city.longitude);
 
-			for player in state.guesses.clone() {
-				let packet = player.1;
+			for guess in state.guesses.clone() {
+				let packet = guess.1;
 				let distance =
 					target.distance_to(&geoutils::Location::new(packet.lat, packet.long));
 				let points = utils::calculate_score(distance.unwrap().meters() / 1000.0);
 
-				if let Some(existing_player) = state.leaderboard.get(&player.0) {
-					let p = existing_player.to_owned();
-					state.leaderboard.insert(player.0, (p.0, p.1 + points));
+				if let Some(existing_player) = state.leaderboard.get(&guess.0) {
+					let mut p = existing_player.to_owned();
+					p.score += points;
+					state.leaderboard.insert(guess.0, p);
 				}
 			}
 
