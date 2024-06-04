@@ -59,7 +59,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 	let socketio_state = Arc::new(Mutex::new(game::GameState {
 		guesses: game::Guesses::new(),
-		leaderboard: game::Leaderboard::new(),
+		leaderboard: game::PlayerMap::new(),
 	}));
 
 	let (socketio_layer, io) = SocketIoBuilder::new()
