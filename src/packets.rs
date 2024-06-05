@@ -1,9 +1,9 @@
 use crate::datasource;
-use crate::game::{Guesses, PlayerMap};
+use crate::state::{Guesses, PlayerMap};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct GuessMessage {
+pub struct GuessPacket {
 	pub lat: f32,
 	pub long: f32,
 }
@@ -22,7 +22,6 @@ pub struct JoinMessage {
 }
 
 #[derive(Serialize, Debug)]
-pub struct JoinResponsePacket {
-	pub ok: bool,
-	pub error: Option<String>,
+pub struct DisconnectPacket {
+	pub message: String,
 }
