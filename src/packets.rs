@@ -1,5 +1,5 @@
 use crate::datasource;
-use crate::state::{Guesses, PlayerMap};
+use crate::state::{GuessMap, PlayerMap};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -11,7 +11,7 @@ pub struct GuessPacket {
 #[derive(Serialize)]
 pub struct SolutionPacket {
 	pub location: datasource::City,
-	pub guesses: Guesses,
+	pub guesses: GuessMap,
 	pub leaderboard: PlayerMap,
 }
 

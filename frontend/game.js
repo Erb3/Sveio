@@ -7,8 +7,8 @@ let targetAnnounced = false;
 
 function createMarkerIcon(color) {
   return L.icon({
-    iconUrl: "/static/assets/marker-icon-" + color + ".png",
-    shadowUrl: "/static/assets/marker-shadow.png",
+    iconUrl: "/assets/marker-icon-" + color + ".png",
+    shadowUrl: "/assets/marker-shadow.png",
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],

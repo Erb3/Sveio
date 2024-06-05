@@ -21,34 +21,38 @@ pub struct Player {
 
 impl Player {
 	pub fn new(username: String) -> Player {
-		return Player {
+		Player {
 			username: Username(username),
 			score: 0,
 			last_packet: Utc::now().timestamp_millis(),
-		};
+		}
+	}
+
+	pub fn update_last_packet(&mut self) {
+		self.last_packet = Utc::now().timestamp_millis();
 	}
 }
 
-pub type Guesses = HashMap<Sid, packets::GuessPacket>;
+pub type GuessMap = HashMap<Sid, packets::GuessPacket>;
 pub type PlayerMap = HashMap<Sid, Player>;
 
 #[derive(Clone)]
 pub struct GameState {
-	guesses: Arc<RwLock<Guesses>>,
+	guesses: Arc<RwLock<GuessMap>>,
 	players: Arc<RwLock<PlayerMap>>,
 }
 
 impl GameState {
 	pub fn new() -> GameState {
-		return GameState {
-			guesses: Arc::new(RwLock::new(Guesses::new())),
+		GameState {
+			guesses: Arc::new(RwLock::new(GuessMap::new())),
 			players: Arc::new(RwLock::new(PlayerMap::new())),
-		};
+		}
 	}
 
 	// Guesses
 
-	pub async fn get_guesses(&self) -> Guesses {
+	pub async fn get_guesses(&self) -> GuessMap {
 		self.guesses.read().await.clone()
 	}
 
@@ -71,10 +75,11 @@ impl GameState {
 	}
 
 	pub async fn get_player(&self, sid: Sid) -> Option<Player> {
-		match self.players.read().await.get(&sid) {
-			Some(player) => Some(player.to_owned()),
-			None => None,
-		}
+		self.players
+			.read()
+			.await
+			.get(&sid)
+			.map(|player| player.to_owned())
 	}
 
 	pub async fn remove_player(&self, sid: Sid) {
@@ -92,8 +97,7 @@ impl GameState {
 		let player = self.get_player(sid).await;
 
 		if let Some(mut p) = player {
-			p.last_packet = Utc::now().timestamp_millis();
-			self.players.write().await.insert(sid, p);
+			p.update_last_packet();
 		}
 	}
 }
