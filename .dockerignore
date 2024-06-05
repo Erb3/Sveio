@@ -1,4 +1,5 @@
-.idea
-dist
-build
-target
+*
+!src
+!Cargo.*
+!cities.json
+!frontend

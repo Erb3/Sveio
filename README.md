@@ -7,7 +7,7 @@ A geography game inspired by [Posio](https://github.com/abrenaut/posio), written
 Sveio is available as a docker image. If you use `docker run` you can run the following to start it:
 
 ```bash
-docker run -d -p 8085:8085 --env-file=.env ghcr.io/erb3/sveio:main
+docker run -d -p 8085:8085 ghcr.io/erb3/sveio:main
 ```
 
 Alternatively, you can use the following docker compose:
@@ -20,8 +20,6 @@ services:
     ports:
       - 8085:8085
     restart: unless-stopped
-    env_file:
-      - .env
 ```
 
 ## Configuration

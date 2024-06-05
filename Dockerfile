@@ -29,7 +29,7 @@ RUN cargo build --target x86_64-unknown-linux-musl --release
 ####################################################################################################
 FROM scratch
 
-# Import from builder.
+# Import data from builder
 COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /etc/group /etc/group
 
@@ -37,10 +37,8 @@ WORKDIR /sveio
 
 # Copy our build
 COPY --from=builder /sveio/target/x86_64-unknown-linux-musl/release/sveio ./
-COPY --from=builder /sveio/cities.json ./
-COPY --from=builder /sveio/frontend ./frontend
 
-# Use an unprivileged user.
+# Use an unprivileged user
 USER sveio:sveio
 
 CMD ["/sveio/sveio"]
