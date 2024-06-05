@@ -1,53 +1,29 @@
-use crate::{datasource, packets, utils};
+use crate::state::GameState;
+use crate::{datasource, packets, state, utils};
+use chrono::Utc;
 use geoutils::Location;
 use rand::{thread_rng, Rng};
 use regex::Regex;
-use serde::{Deserialize, Serialize};
 use socketioxide::extract::{Data, SocketRef, State};
-use socketioxide::socket::Sid;
 use socketioxide::SocketIo;
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::time;
 use tracing::info;
-
-#[derive(Deserialize, Serialize, Debug, Clone)]
-#[serde(transparent)]
-pub struct Username(String);
-
-#[derive(Serialize, Debug, Clone)]
-pub struct Player {
-	pub username: Username,
-	pub score: u64,
-}
-
-pub type Guesses = HashMap<Sid, packets::GuessMessage>;
-pub type PlayerMap = HashMap<Sid, Player>;
-
-pub struct GameState {
-	pub guesses: Guesses,
-	pub leaderboard: PlayerMap,
-}
-type EncapsulatedGameState = Arc<Mutex<GameState>>;
 
 pub fn on_connect(socket: SocketRef) {
 	info!("🆕 Client connected with ID {}", socket.id);
 
 	socket.on(
 		"join",
-		|socket: SocketRef,
-		 Data::<packets::JoinMessage>(data),
-		 state: State<EncapsulatedGameState>| {
+		|socket: SocketRef, Data::<packets::JoinMessage>(data), state: State<state::GameState>| async move {
 			let username_regex = Regex::new(r"^[A-Za-z0-9 _-]{1,32}$").unwrap();
 
 			if !username_regex.is_match(&data.username) {
 				socket
 					.emit(
-						"join-response",
-						packets::JoinResponsePacket {
-							ok: false,
-							error: Some("Bad username".to_string()),
+						"kick",
+						packets::DisconnectPacket {
+							message: "Bad username".to_string(),
 						},
 					)
 					.unwrap();
@@ -56,20 +32,12 @@ pub fn on_connect(socket: SocketRef) {
 				return;
 			}
 
-			if state
-				.lock()
-				.unwrap()
-				.leaderboard
-				.clone()
-				.into_iter()
-				.any(|v| v.1.username.0 == data.username)
-			{
+			if state.is_username_taken(data.username.clone()).await {
 				socket
 					.emit(
-						"join-response",
-						packets::JoinResponsePacket {
-							ok: false,
-							error: Some("Username taken".to_string()),
+						"kick",
+						packets::DisconnectPacket {
+							message: "Username taken".to_string(),
 						},
 					)
 					.unwrap();
@@ -78,24 +46,11 @@ pub fn on_connect(socket: SocketRef) {
 				return;
 			}
 
-			state.lock().unwrap().leaderboard.insert(
-				socket.id,
-				Player {
-					username: Username(data.username.clone()),
-					score: 0,
-				},
-			);
+			state
+				.insert_player(socket.id, state::Player::new(data.username.clone()))
+				.await;
 
-			socket
-				.emit(
-					"join-response",
-					packets::JoinResponsePacket {
-						ok: true,
-						error: None,
-					},
-				)
-				.unwrap();
-
+			socket.emit("join-response", "").unwrap();
 			socket.join("PRIMARY").unwrap();
 
 			info!(
@@ -107,25 +62,20 @@ pub fn on_connect(socket: SocketRef) {
 
 	socket.on(
 		"guess",
-		|socket: SocketRef,
-		 Data::<packets::GuessMessage>(data),
-		 game_state: State<EncapsulatedGameState>| {
+		|socket: SocketRef, Data::<packets::GuessPacket>(data), state: State<GameState>| async move {
 			info!("📬 Received message: {:?}", data);
-			game_state.lock().unwrap().guesses.insert(socket.id, data);
+			state.insert_guess(socket.id, data).await;
+			state.update_last_packet(socket.id).await;
 		},
 	);
 
-	socket.on_disconnect(|s: SocketRef, state: State<EncapsulatedGameState>| {
-		state.lock().unwrap().leaderboard.remove(&s.id);
+	socket.on_disconnect(|s: SocketRef, state: State<GameState>| async move {
+		state.remove_player(s.id).await;
 		info!("🚪 User {} disconnected.", s.id);
 	});
 }
 
-pub async fn game_loop(
-	cities: Vec<datasource::City>,
-	io: SocketIo,
-	game_state: EncapsulatedGameState,
-) {
+pub async fn game_loop(cities: Vec<datasource::City>, io: SocketIo, state: GameState) {
 	let mut interval = time::interval(Duration::from_secs(5));
 	let mut last_city: Option<&datasource::City> = None;
 
@@ -133,26 +83,25 @@ pub async fn game_loop(
 		interval.tick().await;
 
 		if let Some(city) = last_city.cloned() {
-			let mut state = game_state.lock().unwrap();
 			let target = Location::new(city.latitude, city.longitude);
 
-			for guess in state.guesses.clone() {
+			for guess in state.get_guesses().await {
 				let packet = guess.1;
 				let distance =
 					target.distance_to(&geoutils::Location::new(packet.lat, packet.long));
 				let points = utils::calculate_score(distance.unwrap().meters() / 1000.0);
 
-				if let Some(existing_player) = state.leaderboard.get(&guess.0) {
+				if let Some(existing_player) = state.get_player(guess.0).await {
 					let mut p = existing_player.to_owned();
 					p.score += points;
-					state.leaderboard.insert(guess.0, p);
+					state.insert_player(guess.0, p).await;
 				}
 			}
 
 			let solution = packets::SolutionPacket {
 				location: city,
-				guesses: state.guesses.clone(),
-				leaderboard: state.leaderboard.clone(),
+				guesses: state.get_guesses().await,
+				leaderboard: state.get_players().await,
 			};
 
 			io.to("PRIMARY")
@@ -169,11 +118,28 @@ pub async fn game_loop(
 		};
 
 		info!("📍 New location: {}, {}", &city.name, &city.country);
-		game_state.lock().unwrap().guesses.clear();
+		state.clear_guesses().await;
+
 		io.to("PRIMARY")
 			.emit("newTarget", target_message)
 			.expect("Unable to broadcast new target");
 
 		last_city = Some(city);
+
+		for socket in io.sockets().unwrap() {
+			if let Some(player) = state.get_player(socket.id).await {
+				if Utc::now().timestamp_millis() > player.last_packet + 30 * 1000 {
+					socket
+						.emit(
+							"kick",
+							packets::DisconnectPacket {
+								message: "Automatically removed due to inactivity".to_string(),
+							},
+						)
+						.unwrap();
+					socket.disconnect().unwrap();
+				}
+			}
+		}
 	}
 }

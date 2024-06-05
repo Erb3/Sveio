@@ -17,6 +17,7 @@ tower = "0.4.13"
 dotenvy = "0.15.7"
 geoutils = "0.5.1"
 regex = "1.10.4"
+chrono = "0.4.38"
 
 [profile.release]
 codegen-units = 1

@@ -1,6 +1,7 @@
 mod datasource;
 mod game;
 mod packets;
+mod state;
 mod utils;
 use axum::handler::Handler;
 use axum::http::{HeaderMap, Method, StatusCode};
@@ -8,7 +9,7 @@ use axum::response::IntoResponse;
 use axum::routing::get;
 use dotenvy::dotenv;
 use socketioxide::SocketIoBuilder;
-use std::sync::{Arc, Mutex};
+use state::GameState;
 use tokio::fs;
 use tower::ServiceBuilder;
 use tower_http::cors::{Any, CorsLayer};
@@ -57,13 +58,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let cities = datasource::get_cities().await;
 	info!("✨ Loaded {} cities", cities.len());
 
-	let socketio_state = Arc::new(Mutex::new(game::GameState {
-		guesses: game::Guesses::new(),
-		leaderboard: game::PlayerMap::new(),
-	}));
+	let socketio_state = GameState::new();
 
 	let (socketio_layer, io) = SocketIoBuilder::new()
-		.with_state(Arc::clone(&socketio_state))
+		.with_state(socketio_state.clone())
 		.build_layer();
 
 	io.ns("/", game::on_connect);
@@ -92,7 +90,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 	info!("🎮 Starting game loop");
 
-	tokio::spawn(async move {
+	tokio::spawn(async {
 		game::game_loop(cities, io, socketio_state).await;
 	});
 

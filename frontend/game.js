@@ -122,10 +122,13 @@ socket.on("solution", (data) => {
   mapElement.classList.add("cursor-grab");
 });
 
-socket.on("join-response", (data) => {
-  if (!data.ok) {
-    location.href = "/?error=" + data.error;
-  }
+socket.on("join-response", () => {
+  console.log("Connected!");
+});
+
+socket.on("kick", (data) => {
+  console.log(data);
+  location.href = "/?error=" + data.message;
 });
 
 socket.on("connect", () => {
