@@ -6,10 +6,14 @@ mod utils;
 use axum::http::Method;
 use dotenvy::dotenv;
 use memory_serve::{load_assets, MemoryServe};
-use socketioxide::SocketIoBuilder;
+use socketioxide::{SocketIo, SocketIoBuilder};
 use state::GameState;
+use std::sync::Arc;
+use std::time::Duration;
+use tokio::signal;
 use tower::ServiceBuilder;
 use tower_http::cors::{Any, CorsLayer};
+use tower_http::timeout::TimeoutLayer;
 use tracing::info;
 use tracing_subscriber::FmtSubscriber;
 
@@ -51,12 +55,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 						.allow_origin(Any),
 				)
 				.layer(socketio_layer),
-		);
+		)
+		.layer(TimeoutLayer::new(Duration::from_secs(2)));
 
 	info!("🎮 Starting game loop");
 
-	tokio::spawn(async {
-		game::game_loop(cities, io, socketio_state).await;
+	let io_arc = Arc::new(io);
+	let game_io = Arc::clone(&io_arc);
+	let shutdown_io = Arc::clone(&io_arc);
+
+	tokio::spawn(async move {
+		game::game_loop(cities, game_io, socketio_state).await;
 	});
 
 	info!("⏳ Starting HTTP server");
@@ -69,6 +78,49 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	.unwrap();
 
 	info!("✅ Listening on http://{}", listener.local_addr().unwrap());
-	axum::serve(listener, app).await.unwrap();
+	axum::serve(listener, app)
+		.with_graceful_shutdown(shutdown_signal(shutdown_io))
+		.await
+		.unwrap();
 	Ok(())
+}
+
+async fn shutdown_signal(io: Arc<SocketIo>) {
+	let ctrl_c = async {
+		signal::ctrl_c()
+			.await
+			.expect("failed to install Ctrl+C handler");
+	};
+
+	#[cfg(unix)]
+	let terminate = async {
+		signal::unix::signal(signal::unix::SignalKind::terminate())
+			.expect("failed to install signal handler")
+			.recv()
+			.await;
+	};
+
+	#[cfg(not(unix))]
+	let terminate = std::future::pending::<()>();
+
+	tokio::select! {
+		_ = ctrl_c => {},
+		_ = terminate => {},
+	}
+
+	info!("Termination signal received, starting graceful shutdown. Exiting in 5s");
+	for socket in io.sockets().unwrap() {
+		socket
+			.emit(
+				"kick",
+				packets::DisconnectPacket {
+					message: "Server going down".to_string(),
+				},
+			)
+			.unwrap();
+		socket.disconnect().unwrap();
+	}
+
+	tokio::time::sleep(Duration::from_secs(5)).await;
+	info!("Exit imminent")
 }
