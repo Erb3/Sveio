@@ -3,49 +3,15 @@ mod game;
 mod packets;
 mod state;
 mod utils;
-use axum::handler::Handler;
-use axum::http::{HeaderMap, Method, StatusCode};
-use axum::response::IntoResponse;
-use axum::routing::get;
+use axum::http::Method;
 use dotenvy::dotenv;
+use memory_serve::{load_assets, MemoryServe};
 use socketioxide::SocketIoBuilder;
 use state::GameState;
-use tokio::fs;
 use tower::ServiceBuilder;
 use tower_http::cors::{Any, CorsLayer};
-use tower_http::services::ServeDir;
 use tracing::info;
 use tracing_subscriber::FmtSubscriber;
-
-#[derive(Clone)]
-struct AppState {
-	landing_page_content: String,
-	game_page_content: String,
-	not_found_page_content: String,
-	robots_txt_content: String,
-}
-
-impl AppState {
-	async fn get() -> AppState {
-		let mut landing = read_file("./frontend/landing.html").await;
-		if std::env::var("HIDE_VIEW_SOURCE_BUTTON").unwrap_or("false".to_string()) != "false" {
-			landing = landing.replace("View Code", "");
-		}
-
-		AppState {
-			landing_page_content: landing,
-			game_page_content: read_file("./frontend/game.html").await,
-			not_found_page_content: read_file("./frontend/404.html").await,
-			robots_txt_content: read_file("./frontend/robots.txt").await,
-		}
-	}
-}
-
-async fn read_file(path: &str) -> String {
-	fs::read_to_string(path)
-		.await
-		.expect("Should be able to read static page into memory")
-}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -66,16 +32,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 	io.ns("/", game::on_connect);
 
-	let state = AppState::get().await;
 	let app = axum::Router::new()
-		.route("/", get(landing_page))
-		.route("/game", get(game_page))
-		.route("/robots.txt", get(robots_page))
-		.fallback(get(not_found_page))
 		.nest_service(
-			"/static/",
-			ServeDir::new("frontend")
-				.not_found_service(Handler::with_state(get(not_found_page), state.clone())),
+			"/",
+			MemoryServe::new(load_assets!("frontend"))
+				.index_file(Some("/landing.html"))
+				.add_alias("/game", "/game.html")
+				.add_alias("/404", "/404.html")
+				.fallback(Some("/404.html"))
+				.html_cache_control(memory_serve::CacheControl::Medium)
+				.into_router(),
 		)
 		.layer(
 			ServiceBuilder::new()
@@ -85,8 +51,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 						.allow_origin(Any),
 				)
 				.layer(socketio_layer),
-		)
-		.with_state(state);
+		);
 
 	info!("🎮 Starting game loop");
 
@@ -106,36 +71,4 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	info!("✅ Listening on http://{}", listener.local_addr().unwrap());
 	axum::serve(listener, app).await.unwrap();
 	Ok(())
-}
-
-async fn not_found_page(
-	axum::extract::State(state): axum::extract::State<AppState>,
-) -> impl IntoResponse {
-	let mut headers = HeaderMap::new();
-	headers.insert("Content-Type", "text/html; charset=utf-8".parse().unwrap());
-	(StatusCode::NOT_FOUND, headers, state.not_found_page_content)
-}
-
-async fn landing_page(
-	axum::extract::State(state): axum::extract::State<AppState>,
-) -> impl IntoResponse {
-	let mut headers = HeaderMap::new();
-	headers.insert("Content-Type", "text/html; charset=utf-8".parse().unwrap());
-	(headers, state.landing_page_content)
-}
-
-async fn game_page(
-	axum::extract::State(state): axum::extract::State<AppState>,
-) -> impl IntoResponse {
-	let mut headers = HeaderMap::new();
-	headers.insert("Content-Type", "text/html; charset=utf-8".parse().unwrap());
-	(headers, state.game_page_content)
-}
-
-async fn robots_page(
-	axum::extract::State(state): axum::extract::State<AppState>,
-) -> impl IntoResponse {
-	let mut headers = HeaderMap::new();
-	headers.insert("Content-Type", "text/html; charset=utf-8".parse().unwrap());
-	(headers, state.robots_txt_content)
 }

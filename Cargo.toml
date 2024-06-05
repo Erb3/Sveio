@@ -18,6 +18,7 @@ dotenvy = "0.15.7"
 geoutils = "0.5.1"
 regex = "1.10.4"
 chrono = "0.4.38"
+memory-serve = "0.4.5"
 
 [profile.release]
 codegen-units = 1
