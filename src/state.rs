@@ -27,10 +27,6 @@ impl Player {
 			last_packet: Utc::now().timestamp_millis(),
 		}
 	}
-
-	pub fn update_last_packet(&mut self) {
-		self.last_packet = Utc::now().timestamp_millis();
-	}
 }
 
 pub type GuessMap = HashMap<Sid, packets::GuessPacket>;
@@ -97,7 +93,8 @@ impl GameState {
 		let player = self.get_player(sid).await;
 
 		if let Some(mut p) = player {
-			p.update_last_packet();
+			p.last_packet = Utc::now().timestamp_millis();
+			self.insert_player(sid, p).await;
 		}
 	}
 }
