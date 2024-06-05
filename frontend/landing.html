@@ -97,8 +97,8 @@
 
       const params = new URLSearchParams(window.location.search);
       const errorElement = document.querySelector(".error");
-      if (params.has("error")) {
-        errorElement.innerHTML = "Error: " + params.get("error");
+      if (params.has("message")) {
+        errorElement.innerHTML = params.get("message");
         errorElement.style.display = "block";
       }
     </script>

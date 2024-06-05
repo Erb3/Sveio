@@ -128,7 +128,7 @@ socket.on("join-response", () => {
 
 socket.on("kick", (data) => {
   console.log(data);
-  location.href = "/?error=" + data.message;
+  location.href = "/?message=" + data.message;
 });
 
 socket.on("connect", () => {

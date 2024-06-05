@@ -6,6 +6,7 @@ use rand::{thread_rng, Rng};
 use regex::Regex;
 use socketioxide::extract::{Data, SocketRef, State};
 use socketioxide::SocketIo;
+use std::sync::Arc;
 use std::time::Duration;
 use tokio::time;
 use tracing::info;
@@ -75,7 +76,7 @@ pub fn on_connect(socket: SocketRef) {
 	});
 }
 
-pub async fn game_loop(cities: Vec<datasource::City>, io: SocketIo, state: GameState) {
+pub async fn game_loop(cities: Vec<datasource::City>, io: Arc<SocketIo>, state: GameState) {
 	let mut interval = time::interval(Duration::from_secs(5));
 	let mut last_city: Option<&datasource::City> = None;
 
