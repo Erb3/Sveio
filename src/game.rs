@@ -129,7 +129,7 @@ pub async fn game_loop(cities: Vec<datasource::City>, io: Arc<SocketIo>, state: 
 
 		for socket in io.sockets().unwrap() {
 			if let Some(player) = state.get_player(socket.id).await {
-				if Utc::now().timestamp_millis() > player.last_packet + 30 * 1000 {
+				if Utc::now().timestamp_millis() > player.last_packet + 3 * 60 * 1000 {
 					socket
 						.emit(
 							"kick",
