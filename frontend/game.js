@@ -37,10 +37,13 @@ const map = L.map("map", {
   doubleClickZoom: false,
 }).setView([51.505, -0.09], 13);
 
-L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution:
-    '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-}).addTo(map);
+L.tileLayer(
+  "https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}@2x.png",
+  {
+    attribution:
+      '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  }
+).addTo(map);
 map.attributionControl.setPosition("bottomleft");
 map.setZoom(3);
 

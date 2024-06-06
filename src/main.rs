@@ -108,7 +108,7 @@ async fn shutdown_signal(io: Arc<SocketIo>) {
 		_ = terminate => {},
 	}
 
-	info!("Termination signal received, starting graceful shutdown. Exiting in 5s");
+	info!("Termination signal received, starting graceful shutdown. Exiting soon");
 	for socket in io.sockets().unwrap() {
 		socket
 			.emit(
@@ -121,6 +121,11 @@ async fn shutdown_signal(io: Arc<SocketIo>) {
 		socket.disconnect().unwrap();
 	}
 
-	tokio::time::sleep(Duration::from_secs(5)).await;
+	tokio::time::sleep(Duration::from_secs(if cfg!(debug_assertions) {
+		0
+	} else {
+		5
+	}))
+	.await;
 	info!("Exit imminent")
 }
