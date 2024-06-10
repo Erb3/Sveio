@@ -2,6 +2,8 @@
 name = "sveio"
 version = "0.1.0"
 edition = "2021"
+authors = ["Erb3"]
+description = "A multiplayer geography game inspired by Posio"
 
 [dependencies]
 socketioxide = {version = "0.13.1", features=["extensions", "state"]}
@@ -19,6 +21,7 @@ geoutils = "0.5.1"
 regex = "1.10.4"
 chrono = "0.4.38"
 memory-serve = "0.4.5"
+clap = { version = "4.5.7", features = ["derive", "env"] }
 
 [profile.release]
 codegen-units = 1
