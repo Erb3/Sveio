@@ -9,10 +9,9 @@ use socketioxide::SocketIo;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::time;
-use tracing::info;
-
+use tracing::{debug, info};
 pub fn on_connect(socket: SocketRef) {
-	info!("🆕 Client connected with ID {}", socket.id);
+	debug!("🆕 Client connected with client id {}", socket.id);
 
 	socket.on(
 		"join",
@@ -64,7 +63,7 @@ pub fn on_connect(socket: SocketRef) {
 	socket.on(
 		"guess",
 		|socket: SocketRef, Data::<packets::GuessPacket>(data), state: State<GameState>| async move {
-			info!("📬 Received message: {:?}", data);
+			debug!("📬 Received message: {:?}", data);
 			state.insert_guess(socket.id, data).await;
 			state.update_last_packet(socket.id).await;
 		},
@@ -72,7 +71,7 @@ pub fn on_connect(socket: SocketRef) {
 
 	socket.on_disconnect(|s: SocketRef, state: State<GameState>| async move {
 		state.remove_player(s.id).await;
-		info!("🚪 User {} disconnected.", s.id);
+		debug!("🚪 User {} disconnected.", s.id);
 	});
 }
 
@@ -118,7 +117,7 @@ pub async fn game_loop(cities: Vec<datasource::City>, io: Arc<SocketIo>, state: 
 			country: &city.country,
 		};
 
-		info!("📍 New location: {}, {}", &city.name, &city.country);
+		debug!("📍 New location: {}, {}", &city.name, &city.country);
 		state.clear_guesses().await;
 
 		io.to("PRIMARY")
