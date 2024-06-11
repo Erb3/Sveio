@@ -8,19 +8,21 @@ mod utils;
 use dotenvy::dotenv;
 use server::ServerOptions;
 use tracing::info;
-use tracing_subscriber::FmtSubscriber;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-	tracing::subscriber::set_global_default(FmtSubscriber::default())?;
-	info!("👋 Sveio says hi!");
-	info!("⚙️  Loading environment variables!");
 	let _ = dotenv();
+	let settings = cli::get_settings();
+
+	tracing_subscriber::fmt()
+		.with_max_level(settings.logging.unwrap_or(cli::LoggingLevel::Info))
+		.init();
+
+	info!("👋 Sveio says hi!");
 
 	info!("⏳ Loading cities!");
 	let cities = datasource::get_cities().await;
 	info!("✨ Loaded {} cities", cities.len());
-	let settings = cli::get_settings();
 
 	server::start_server(ServerOptions {
 		cities,
