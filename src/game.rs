@@ -1,4 +1,3 @@
-use crate::state::GameState;
 use crate::{datasource, packets, state, utils};
 use chrono::Utc;
 use geoutils::Location;
@@ -10,6 +9,11 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::time;
 use tracing::{debug, info};
+
+pub struct GameOptions {
+	pub cities: Vec<datasource::City>,
+}
+
 pub fn on_connect(socket: SocketRef) {
 	debug!("🆕 Client connected with client id {}", socket.id);
 
@@ -62,20 +66,20 @@ pub fn on_connect(socket: SocketRef) {
 
 	socket.on(
 		"guess",
-		|socket: SocketRef, Data::<packets::GuessPacket>(data), state: State<GameState>| async move {
+		|socket: SocketRef, Data::<packets::GuessPacket>(data), state: State<state::GameState>| async move {
 			debug!("📬 Received message: {:?}", data);
 			state.insert_guess(socket.id, data).await;
 			state.update_last_packet(socket.id).await;
 		},
 	);
 
-	socket.on_disconnect(|s: SocketRef, state: State<GameState>| async move {
+	socket.on_disconnect(|s: SocketRef, state: State<state::GameState>| async move {
 		state.remove_player(s.id).await;
 		debug!("🚪 User {} disconnected.", s.id);
 	});
 }
 
-pub async fn game_loop(cities: Vec<datasource::City>, io: Arc<SocketIo>, state: GameState) {
+pub async fn game_loop(options: GameOptions, io: Arc<SocketIo>, state: state::GameState) {
 	let mut interval = time::interval(Duration::from_secs(5));
 	let mut last_city: Option<&datasource::City> = None;
 
@@ -111,7 +115,10 @@ pub async fn game_loop(cities: Vec<datasource::City>, io: Arc<SocketIo>, state: 
 
 		interval.tick().await;
 
-		let city: &datasource::City = cities.get(thread_rng().gen_range(0..cities.len())).unwrap();
+		let city: &datasource::City = options
+			.cities
+			.get(thread_rng().gen_range(0..options.cities.len()))
+			.unwrap();
 		let target_message = datasource::AnonymizedCity {
 			name: &city.name,
 			country: &city.country,

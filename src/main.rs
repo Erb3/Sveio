@@ -6,7 +6,6 @@ mod server;
 mod state;
 mod utils;
 use dotenvy::dotenv;
-use server::ServerOptions;
 use tracing::info;
 
 #[tokio::main]
@@ -19,13 +18,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 		.init();
 
 	info!("👋 Sveio says hi!");
-
 	info!("⏳ Loading cities!");
 	let cities = datasource::get_cities().await;
 	info!("✨ Loaded {} cities", cities.len());
 
-	server::start_server(ServerOptions {
-		cities,
+	server::start_server(server::ServerOptions {
+		game: game::GameOptions { cities },
 		port: settings.port.unwrap_or(8085),
 	})
 	.await;
