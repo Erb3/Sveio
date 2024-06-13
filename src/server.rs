@@ -1,6 +1,4 @@
-use crate::datasource::City;
-use crate::state::GameState;
-use crate::{game, packets};
+use crate::{game, packets, state};
 use axum::http::Method;
 use memory_serve::{load_assets, MemoryServe};
 use socketioxide::{SocketIo, SocketIoBuilder};
@@ -13,12 +11,12 @@ use tower_http::timeout::TimeoutLayer;
 use tracing::info;
 
 pub struct ServerOptions {
-	pub cities: Vec<City>,
+	pub game: game::GameOptions,
 	pub port: u32,
 }
 
 pub async fn start_server(opts: ServerOptions) {
-	let socketio_state = GameState::new();
+	let socketio_state = state::GameState::new();
 
 	let (socketio_layer, io) = SocketIoBuilder::new()
 		.with_state(socketio_state.clone())
@@ -55,7 +53,7 @@ pub async fn start_server(opts: ServerOptions) {
 	let shutdown_io = Arc::clone(&io_arc);
 
 	tokio::spawn(async move {
-		game::game_loop(opts.cities, game_io, socketio_state).await;
+		game::game_loop(opts.game, game_io, socketio_state).await;
 	});
 
 	info!("⏳ Starting HTTP server");

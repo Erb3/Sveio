@@ -30,7 +30,7 @@ pub struct Cli {
 	#[arg(short, long, env = "SVEIO_PORT")]
 	pub port: Option<u32>,
 
-	/// Optional logging level to use. Default is INFO
+	/// Optional logging level to use. Default is info
 	#[arg(short, long, env = "SVEIO_LOGGING_LEVEL")]
 	pub logging: Option<LoggingLevel>,
 }

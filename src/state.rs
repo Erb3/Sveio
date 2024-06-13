@@ -1,4 +1,4 @@
-use crate::packets::{self, GuessPacket};
+use crate::packets;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use socketioxide::socket::Sid;
@@ -56,7 +56,7 @@ impl GameState {
 		self.guesses.write().await.clear()
 	}
 
-	pub async fn insert_guess(&self, sid: Sid, guess: GuessPacket) {
+	pub async fn insert_guess(&self, sid: Sid, guess: packets::GuessPacket) {
 		self.guesses.write().await.insert(sid, guess);
 	}
 
