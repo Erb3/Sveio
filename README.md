@@ -4,6 +4,10 @@ A geography game inspired by [Posio](https://github.com/abrenaut/posio), written
 
 ## Deployment
 
+> [!IMPORTANT]
+> Sveio does not impose any rate limit itself.
+> You have to do this yourself, with something like nginx.
+
 Sveio is available as a docker image. If you use `docker run` you can run the following to start it:
 
 ```bash
