@@ -29,10 +29,12 @@ pub async fn start_server(opts: ServerOptions) {
 			"/",
 			MemoryServe::new(load_assets!("frontend"))
 				.index_file(Some("/landing.html"))
-				.add_alias("/game", "/game.html")
-				.add_alias("/404", "/404.html")
 				.fallback(Some("/404.html"))
 				.html_cache_control(memory_serve::CacheControl::Medium)
+				.add_alias("/game", "/game.html")
+				.add_alias("/404", "/404.html")
+				.add_alias("/favicon.ico", "/icons/favicon.ico")
+				.add_alias("/site.webmanifest", "/icons/site.webmanifest")
 				.into_router(),
 		)
 		.layer(
