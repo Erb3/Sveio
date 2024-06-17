@@ -22,6 +22,11 @@ regex = "1.10.4"
 chrono = "0.4.38"
 memory-serve = "0.4.5"
 clap = { version = "4.5.7", features = ["derive", "env"] }
+shuttle-runtime = {version = "0.46.0", optional = true}
+shuttle-axum = {version = "0.46.0", optional = true}
+
+[features]
+shuttle = ["dep:shuttle-axum", "dep:shuttle-runtime"]
 
 [profile.release]
 codegen-units = 1
