@@ -12,10 +12,10 @@ use tracing::info;
 
 pub struct ServerOptions {
 	pub game: game::GameOptions,
-	pub port: u32,
+	pub port: Option<u32>,
 }
 
-pub async fn start_server(opts: ServerOptions) {
+pub async fn create_server(opts: ServerOptions) -> Option<axum::Router> {
 	let socketio_state = state::GameState::new();
 
 	let (socketio_layer, io) = SocketIoBuilder::new()
@@ -58,17 +58,22 @@ pub async fn start_server(opts: ServerOptions) {
 		game::game_loop(opts.game, game_io, socketio_state).await;
 	});
 
-	info!("⏳ Starting HTTP server");
+	if let Some(port) = opts.port {
+		info!("⏳ Starting HTTP server");
+		let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", port))
+			.await
+			.unwrap();
 
-	let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", opts.port))
-		.await
-		.unwrap();
+		info!("✅ Listening on http://{}", listener.local_addr().unwrap());
+		axum::serve(listener, app)
+			.with_graceful_shutdown(shutdown_signal(shutdown_io))
+			.await
+			.unwrap();
 
-	info!("✅ Listening on http://{}", listener.local_addr().unwrap());
-	axum::serve(listener, app)
-		.with_graceful_shutdown(shutdown_signal(shutdown_io))
-		.await
-		.unwrap();
+		return None;
+	}
+
+	Some(app)
 }
 
 async fn shutdown_signal(io: Arc<SocketIo>) {
