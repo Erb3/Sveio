@@ -1,12 +1,15 @@
 # Sveio
 
 A geography game inspired by [Posio](https://github.com/abrenaut/posio), written in 🔥🚀Rust.
+View the public instance at [sveio.shuttleapp.rs](https://sveio.shuttleapp.rs)!
 
 ## Deployment
 
 > [!IMPORTANT]
 > Sveio does not impose any rate limit itself.
 > You have to do this yourself, with something like nginx.
+
+### Docker
 
 Sveio is available as a docker image. If you use `docker run` you can run the following to start it:
 
@@ -24,6 +27,17 @@ services:
     ports:
       - 8085:8085
     restart: unless-stopped
+```
+
+### Shuttle
+
+[Shuttle.rs](https://shuttle.rs) is supported for the demo server.
+To enable shuttle support use the `shuttle` feature.
+
+Deploy with Shuttle:
+
+```shell
+cargo shuttle deploy
 ```
 
 ## Configuration
