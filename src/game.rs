@@ -9,7 +9,9 @@ use std::time::Duration;
 use tokio::time;
 use tracing::{debug, info};
 
-pub struct GameOptions {}
+pub struct GameOptions {
+	pub datasource: datasource::Datasource,
+}
 
 pub fn on_connect(socket: SocketRef) {
 	debug!("🆕 Client connected with client id {}", socket.id);
@@ -76,10 +78,10 @@ pub fn on_connect(socket: SocketRef) {
 	});
 }
 
-pub async fn game_loop(_options: GameOptions, io: Arc<SocketIo>, state: state::GameState) {
+pub async fn game_loop(opts: GameOptions, io: Arc<SocketIo>, state: state::GameState) {
 	let mut interval = time::interval(Duration::from_secs(5));
 	let mut last_city: Option<datasource::City> = None;
-	let mut datasource = datasource::new().await;
+	let mut index = 0;
 
 	loop {
 		interval.tick().await;
@@ -113,18 +115,17 @@ pub async fn game_loop(_options: GameOptions, io: Arc<SocketIo>, state: state::G
 
 		interval.tick().await;
 
-		let city = datasource.get_next();
-
-		let target_message = datasource::AnonymizedCity {
-			name: &city.name,
-			country: &city.country,
-		};
+		let city: &datasource::City = opts.datasource.cities.get(index).unwrap();
+		index += 1;
+		if index == opts.datasource.cities.len() - 1 {
+			index = 0;
+		}
 
 		debug!("📍 New location: {}, {}", &city.name, &city.country);
 		state.clear_guesses().await;
 
 		io.to("PRIMARY")
-			.emit("newTarget", target_message)
+			.emit("newTarget", city.clone().anonymize())
 			.expect("Unable to broadcast new target");
 
 		last_city = Some(city.to_owned());
