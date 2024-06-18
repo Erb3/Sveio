@@ -1,7 +1,6 @@
 use crate::{datasource, packets, state, utils};
 use chrono::Utc;
 use geoutils::Location;
-use rand::{thread_rng, Rng};
 use regex::Regex;
 use socketioxide::extract::{Data, SocketRef, State};
 use socketioxide::SocketIo;
@@ -10,9 +9,7 @@ use std::time::Duration;
 use tokio::time;
 use tracing::{debug, info};
 
-pub struct GameOptions {
-	pub cities: Vec<datasource::City>,
-}
+pub struct GameOptions {}
 
 pub fn on_connect(socket: SocketRef) {
 	debug!("🆕 Client connected with client id {}", socket.id);
@@ -79,14 +76,15 @@ pub fn on_connect(socket: SocketRef) {
 	});
 }
 
-pub async fn game_loop(options: GameOptions, io: Arc<SocketIo>, state: state::GameState) {
+pub async fn game_loop(_options: GameOptions, io: Arc<SocketIo>, state: state::GameState) {
 	let mut interval = time::interval(Duration::from_secs(5));
-	let mut last_city: Option<&datasource::City> = None;
+	let mut last_city: Option<datasource::City> = None;
+	let mut datasource = datasource::new().await;
 
 	loop {
 		interval.tick().await;
 
-		if let Some(city) = last_city.cloned() {
+		if let Some(city) = last_city {
 			let target = Location::new(city.latitude, city.longitude);
 
 			for guess in state.get_guesses().await {
@@ -115,10 +113,8 @@ pub async fn game_loop(options: GameOptions, io: Arc<SocketIo>, state: state::Ga
 
 		interval.tick().await;
 
-		let city: &datasource::City = options
-			.cities
-			.get(thread_rng().gen_range(0..options.cities.len()))
-			.unwrap();
+		let city = datasource.get_next();
+
 		let target_message = datasource::AnonymizedCity {
 			name: &city.name,
 			country: &city.country,
@@ -131,7 +127,7 @@ pub async fn game_loop(options: GameOptions, io: Arc<SocketIo>, state: state::Ga
 			.emit("newTarget", target_message)
 			.expect("Unable to broadcast new target");
 
-		last_city = Some(city);
+		last_city = Some(city.to_owned());
 
 		for socket in io.sockets().unwrap() {
 			if let Some(player) = state.get_player(socket.id).await {

@@ -20,12 +20,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 		.init();
 
 	info!("👋 Sveio says hi!");
-	info!("⏳ Loading cities!");
-	let cities = datasource::get_cities().await;
-	info!("✨ Loaded {} cities", cities.len());
 
 	server::create_server(server::ServerOptions {
-		game: game::GameOptions { cities },
+		game: game::GameOptions {},
 		port: Some(settings.port.unwrap_or(8085)),
 	})
 	.await;
@@ -40,7 +37,7 @@ async fn main() -> shuttle_axum::ShuttleAxum {
 
 	info!("👋 Sveio says hi to Shuttle.rs!");
 	info!("⏳ Loading cities!");
-	let cities = datasource::get_cities().await;
+	let cities = datasource::new().await;
 	info!("✨ Loaded {} cities", cities.len());
 
 	Ok(server::create_server(server::ServerOptions {
