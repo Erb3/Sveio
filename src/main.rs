@@ -34,14 +34,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 #[shuttle_runtime::main]
 async fn main() -> shuttle_axum::ShuttleAxum {
 	let _ = dotenv();
-
 	info!("👋 Sveio says hi to Shuttle.rs!");
-	info!("⏳ Loading cities!");
-	let cities = datasource::new().await;
-	info!("✨ Loaded {} cities", cities.len());
 
 	Ok(server::create_server(server::ServerOptions {
-		game: game::GameOptions { cities },
+		game: game::GameOptions {},
 		port: None,
 	})
 	.await
