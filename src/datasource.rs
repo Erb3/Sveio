@@ -10,29 +10,23 @@ pub struct City {
 	pub longitude: f64,
 }
 
+impl City {
+	pub fn anonymize(self) -> AnonymizedCity {
+		AnonymizedCity {
+			country: self.country,
+			name: self.name,
+		}
+	}
+}
+
 #[derive(Serialize)]
-pub struct AnonymizedCity<'a> {
-	pub country: &'a str,
-	pub name: &'a str,
+pub struct AnonymizedCity {
+	pub country: String,
+	pub name: String,
 }
 
 pub struct Datasource {
 	pub cities: Vec<City>,
-	length: usize,
-	index: usize,
-}
-
-impl Datasource {
-	pub fn get_next(&mut self) -> &City {
-		let city: &City = self.cities.get(self.index).unwrap();
-
-		self.index += 1;
-		if self.index == self.length - 1 {
-			self.index = 0;
-		}
-
-		return city;
-	}
 }
 
 pub async fn new() -> Datasource {
@@ -41,9 +35,5 @@ pub async fn new() -> Datasource {
 
 	cities.shuffle(&mut thread_rng());
 
-	Datasource {
-		cities: cities.clone(),
-		length: cities.len(),
-		index: 0,
-	}
+	Datasource { cities }
 }

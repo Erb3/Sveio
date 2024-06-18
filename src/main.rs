@@ -22,7 +22,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	info!("👋 Sveio says hi!");
 
 	server::create_server(server::ServerOptions {
-		game: game::GameOptions {},
+		game: game::GameOptions {
+			datasource: datasource::new().await,
+		},
 		port: Some(settings.port.unwrap_or(8085)),
 	})
 	.await;
@@ -37,7 +39,9 @@ async fn main() -> shuttle_axum::ShuttleAxum {
 	info!("👋 Sveio says hi to Shuttle.rs!");
 
 	Ok(server::create_server(server::ServerOptions {
-		game: game::GameOptions {},
+		game: game::GameOptions {
+			datasource: datasource::new().await,
+		},
 		port: None,
 	})
 	.await
