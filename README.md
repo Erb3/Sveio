@@ -14,7 +14,7 @@ View the public instance at [sveio.shuttleapp.rs](https://sveio.shuttleapp.rs)!
 Sveio is available as a docker image. If you use `docker run` you can run the following to start it:
 
 ```bash
-docker run -d -p 8085:8085 ghcr.io/erb3/sveio:main
+docker run -d -p 8085:8085 ghcr.io/erb3/sveio:latest
 ```
 
 Alternatively, you can use the following docker compose:
@@ -23,7 +23,7 @@ Alternatively, you can use the following docker compose:
 services:
   sveio:
     container_name: sveio
-    image: ghcr.io/erb3/sveio:main
+    image: ghcr.io/erb3/sveio:latest
     ports:
       - 8085:8085
     restart: unless-stopped
