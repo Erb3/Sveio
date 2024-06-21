@@ -23,7 +23,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 	server::create_server(server::ServerOptions {
 		game: game::GameOptions {
-			datasource: datasource::new().await,
+			guess_time: settings.guess_time.unwrap_or(7),
+			showcase_time: settings.showcase_time.unwrap_or(3),
 		},
 		port: Some(settings.port.unwrap_or(8085)),
 	})
@@ -40,7 +41,8 @@ async fn main() -> shuttle_axum::ShuttleAxum {
 
 	Ok(server::create_server(server::ServerOptions {
 		game: game::GameOptions {
-			datasource: datasource::new().await,
+			guess_time: 7,
+			showcase_time: 3,
 		},
 		port: None,
 	})

@@ -16,7 +16,7 @@ pub struct ServerOptions {
 }
 
 pub async fn create_server(opts: ServerOptions) -> Option<axum::Router> {
-	let socketio_state = state::GameState::new();
+	let socketio_state = state::GameState::new(opts.game.clone());
 
 	let (socketio_layer, io) = SocketIoBuilder::new()
 		.with_state(socketio_state.clone())

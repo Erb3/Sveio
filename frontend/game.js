@@ -53,6 +53,7 @@ const distanceLine = L.polyline([], { color: "red" });
 const distancePopup = L.popup();
 const otherPlayerMarkers = [];
 let canMoveMarker = false;
+let guessingTime = 5;
 
 map.on("click", (e) => {
   if (!canMoveMarker) return;
@@ -77,7 +78,7 @@ socket.on("newTarget", (data) => {
 
   targetElement.innerHTML = `${data.name}, ${data.country}`;
   progressElement.style.width = "100%";
-  progressElement.style.transitionDuration = "5s";
+  progressElement.style.transitionDuration = guessingTime + "s";
   canMoveMarker = true;
   mapElement.classList.remove("cursor-grab");
   map.setZoom(3);
@@ -125,12 +126,13 @@ socket.on("solution", (data) => {
   mapElement.classList.add("cursor-grab");
 });
 
-socket.on("join-response", () => {
-  console.log("Connected!");
+socket.on("game-metadata", (data) => {
+  console.log("Connected to game!", data);
+  guessingTime = data.guess_time;
 });
 
 socket.on("kick", (data) => {
-  console.log(data);
+  console.log("Kicked!", data);
   location.href = "/?message=" + data.message;
 });
 

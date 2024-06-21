@@ -33,6 +33,15 @@ pub struct Cli {
 	/// Optional logging level to use. Default is info
 	#[arg(short, long, env = "SVEIO_LOGGING_LEVEL")]
 	pub logging: Option<LoggingLevel>,
+
+	/// Optional amount of seconds to allow guessing. Default is 7s
+	#[arg(long, env = "SVEIO_GUESS_TIME")]
+	pub guess_time: Option<u64>,
+
+	/// Optional amount of seconds where players can see where the others
+	/// guessed. Default is 3s
+	#[arg(long, env = "SVEIO_SHOWCASE_TIME")]
+	pub showcase_time: Option<u64>,
 }
 
 pub fn get_settings() -> Cli {
