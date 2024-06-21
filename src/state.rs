@@ -1,3 +1,4 @@
+use crate::game::GameOptions;
 use crate::packets;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
@@ -36,13 +37,15 @@ pub type PlayerMap = HashMap<Sid, Player>;
 pub struct GameState {
 	guesses: Arc<RwLock<GuessMap>>,
 	players: Arc<RwLock<PlayerMap>>,
+	pub options: GameOptions,
 }
 
 impl GameState {
-	pub fn new() -> GameState {
+	pub fn new(options: GameOptions) -> GameState {
 		GameState {
 			guesses: Arc::new(RwLock::new(GuessMap::new())),
 			players: Arc::new(RwLock::new(PlayerMap::new())),
+			options,
 		}
 	}
 

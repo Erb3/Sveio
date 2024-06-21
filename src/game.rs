@@ -6,11 +6,12 @@ use socketioxide::extract::{Data, SocketRef, State};
 use socketioxide::SocketIo;
 use std::sync::Arc;
 use std::time::Duration;
-use tokio::time;
 use tracing::{debug, info};
 
+#[derive(Clone)]
 pub struct GameOptions {
-	pub datasource: datasource::Datasource,
+	pub guess_time: u64,
+	pub showcase_time: u64,
 }
 
 pub fn on_connect(socket: SocketRef) {
@@ -53,7 +54,16 @@ pub fn on_connect(socket: SocketRef) {
 				.insert_player(socket.id, state::Player::new(data.username.clone()))
 				.await;
 
-			socket.emit("join-response", "").unwrap();
+			socket
+				.emit(
+					"game-metadata",
+					packets::GameMetadataMessage {
+						guess_time: state.options.guess_time,
+						showcase_time: state.options.showcase_time,
+					},
+				)
+				.unwrap();
+
 			socket.join("PRIMARY").unwrap();
 
 			info!(
@@ -79,45 +89,16 @@ pub fn on_connect(socket: SocketRef) {
 }
 
 pub async fn game_loop(opts: GameOptions, io: Arc<SocketIo>, state: state::GameState) {
-	let mut interval = time::interval(Duration::from_secs(5));
-	let mut last_city: Option<datasource::City> = None;
+	let guessing_time = Duration::from_secs(opts.guess_time);
+	let showcase_time = Duration::from_secs(opts.showcase_time);
+	let mut last_city: Option<datasource::City>;
 	let mut index = 0;
+	let datasource = datasource::new().await;
 
 	loop {
-		interval.tick().await;
-
-		if let Some(city) = last_city {
-			let target = Location::new(city.latitude, city.longitude);
-
-			for guess in state.get_guesses().await {
-				let packet = guess.1;
-				let distance =
-					target.distance_to(&geoutils::Location::new(packet.lat, packet.long));
-				let points = utils::calculate_score(distance.unwrap().meters() / 1000.0);
-
-				if let Some(existing_player) = state.get_player(guess.0).await {
-					let mut p = existing_player.to_owned();
-					p.score += points;
-					state.insert_player(guess.0, p).await;
-				}
-			}
-
-			let solution = packets::SolutionPacket {
-				location: city,
-				guesses: state.get_guesses().await,
-				leaderboard: state.get_players().await,
-			};
-
-			io.to("PRIMARY")
-				.emit("solution", solution)
-				.expect("Unable to broadcast solution");
-		}
-
-		interval.tick().await;
-
-		let city: &datasource::City = opts.datasource.cities.get(index).unwrap();
+		let city: &datasource::City = datasource.cities.get(index).unwrap();
 		index += 1;
-		if index == opts.datasource.cities.len() - 1 {
+		if index == datasource.cities.len() - 1 {
 			index = 0;
 		}
 
@@ -145,5 +126,37 @@ pub async fn game_loop(opts: GameOptions, io: Arc<SocketIo>, state: state::GameS
 				}
 			}
 		}
+
+		tokio::time::sleep(guessing_time).await;
+
+		if let Some(city) = last_city {
+			debug!("Announcing solutions");
+			let target = Location::new(city.latitude, city.longitude);
+
+			for guess in state.get_guesses().await {
+				let packet = guess.1;
+				let distance =
+					target.distance_to(&geoutils::Location::new(packet.lat, packet.long));
+				let points = utils::calculate_score(distance.unwrap().meters() / 1000.0);
+
+				if let Some(existing_player) = state.get_player(guess.0).await {
+					let mut p = existing_player.to_owned();
+					p.score += points;
+					state.insert_player(guess.0, p).await;
+				}
+			}
+
+			let solution = packets::SolutionPacket {
+				location: city,
+				guesses: state.get_guesses().await,
+				leaderboard: state.get_players().await,
+			};
+
+			io.to("PRIMARY")
+				.emit("solution", solution)
+				.expect("Unable to broadcast solution");
+		}
+
+		tokio::time::sleep(showcase_time).await;
 	}
 }

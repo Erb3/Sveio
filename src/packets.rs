@@ -21,6 +21,12 @@ pub struct JoinMessage {
 }
 
 #[derive(Serialize, Debug)]
+pub struct GameMetadataMessage {
+	pub guess_time: u64,
+	pub showcase_time: u64,
+}
+
+#[derive(Serialize, Debug)]
 pub struct DisconnectPacket {
 	pub message: String,
 }
