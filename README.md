@@ -42,11 +42,11 @@ cargo shuttle deploy
 
 ## Configuration
 
-The server uses the following environmental variables, and it also parses the .env file if present:
+The server uses the following environmental variables, and can also be passed as cli args.
 
 - `SVEIO_PORT`: The port to serve on. Defaults to `8085`.
 
-There is an example env file, see [`.env.example`](https://github.com/Erb3/sveio/blob/main/.env.example)
+For more information please run `sveio -h`.
 
 ## Socket.io
 
