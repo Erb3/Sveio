@@ -93,7 +93,7 @@ pub async fn game_loop(opts: GameOptions, io: Arc<SocketIo>, state: state::GameS
 	let showcase_time = Duration::from_secs(opts.showcase_time);
 	let mut last_city: Option<datasource::City>;
 	let mut index = 0;
-	let datasource = datasource::new().await;
+	let datasource = datasource::Datasource::new().await;
 
 	loop {
 		let city: &datasource::City = datasource.cities.get(index).unwrap();

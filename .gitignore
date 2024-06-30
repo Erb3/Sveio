@@ -3,3 +3,5 @@ target
 dist
 .env
 build
+perf.data
+flamegraph.svg
