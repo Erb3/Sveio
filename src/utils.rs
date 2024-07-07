@@ -1,5 +1,5 @@
 pub(crate) fn calculate_score(kms: f64) -> u64 {
-	let kilometers = kms.floor() as u64;
+	let kilometers = kms as u64;
 	if kilometers > 1500 {
 		return 0;
 	}
@@ -12,7 +12,7 @@ mod tests {
 	use super::*;
 
 	#[test]
-	fn can_calculate_score() {
+	fn can_calculate_score() {	
 		assert_eq!(calculate_score(1500.0), 0);
 		assert_eq!(calculate_score(1501.0), 0);
 		assert_eq!(calculate_score(1504.0), 0);
