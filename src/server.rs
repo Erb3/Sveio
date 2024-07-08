@@ -28,13 +28,14 @@ pub async fn create_server(opts: ServerOptions) -> Option<axum::Router> {
 		.nest_service(
 			"/",
 			MemoryServe::new(load_assets!("frontend"))
+				.add_alias("/favicon.ico", "/icons/favicon.ico")
+				.add_alias("/site.webmanifest", "/icons/site.webmanifest")
 				.index_file(Some("/landing.html"))
 				.fallback(Some("/404.html"))
 				.html_cache_control(memory_serve::CacheControl::Medium)
-				.add_alias("/game", "/game.html")
-				.add_alias("/404", "/404.html")
-				.add_alias("/favicon.ico", "/icons/favicon.ico")
-				.add_alias("/site.webmanifest", "/icons/site.webmanifest")
+				.enable_clean_url(true)
+				.enable_brotli(true)
+				.enable_gzip(true)
 				.into_router(),
 		)
 		.layer(

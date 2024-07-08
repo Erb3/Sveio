@@ -300,9 +300,9 @@ dependencies = [
 
 [[package]]
 name = "brotli"
-version = "5.0.0"
+version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "19483b140a7ac7174d34b5a581b406c64f84da5409d3e09cf4fff604f9270e67"
+checksum = "74f7971dbd9326d58187408ab83117d8ac1bb9c17b085fdacd1cf2f598719b6b"
 dependencies = [
  "alloc-no-stdlib",
  "alloc-stdlib",
@@ -1075,9 +1075,9 @@ checksum = "6c8640c5d730cb13ebd907d8d04b52f55ac9a2eec55b440c8892f40d56c76c1d"
 
 [[package]]
 name = "memory-serve"
-version = "0.4.5"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d1f8b697424035812d76b87ce97cc06bf144eb569838ebc459f0edd6b473699"
+checksum = "480bd0a4d4cb9f170071fb52e96c275d294f5967a2ce086bc84b9238784a2c25"
 dependencies = [
  "axum 0.7.5",
  "brotli",
@@ -1089,9 +1089,9 @@ dependencies = [
 
 [[package]]
 name = "memory-serve-macros"
-version = "0.4.5"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9049d464b282ee8d87ed38a9144ad263a791e4451c1eb96456da2c00845337f8"
+checksum = "c1a15fb8489173ee78a28d48aa463f65f97f03f571e5e28b7dfee8d8d816b7bd"
 dependencies = [
  "brotli",
  "mime_guess",
