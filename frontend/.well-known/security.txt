@@ -1,0 +1,5 @@
+Contact: https://github.com/Erb3/Sveio/security/advisories/new
+Expires: 2030-01-01T00:00:00.000Z
+Acknowledgments: https://github.com/Erb3/Sveio/security/advisories/
+Preferred-Languages: en
+Policy: https://github.com/Erb3/Sveio/blob/main/SECURITY.md
