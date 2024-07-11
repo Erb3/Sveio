@@ -52,6 +52,20 @@ nav {
   transition-timing-function: linear;
 }
 
+#spinner {
+  width: 10vw;
+  height: 10vw;
+  display: block;
+  position: absolute;
+  top: 50%;
+  right: 50%;
+  transform: translateX(50%) translateY(-50%);
+  z-index: 999;
+  animation: spinner 0.5s infinite linear;
+  transform-origin: center;
+  transition: opacity 0.75s;
+}
+
 @media (max-width: 960px) {
   nav {
     top: 0;
@@ -63,5 +77,15 @@ nav {
 
   aside {
     display: none;
+  }
+}
+
+@keyframes spinner {
+  0% {
+    transform: translateX(50%) translateY(-50%) rotate(0deg);
+  }
+
+  100% {
+    transform: translateX(50%) translateY(-50%) rotate(360deg);
   }
 }

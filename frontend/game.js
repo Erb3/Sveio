@@ -2,6 +2,7 @@ const targetElement = document.querySelector("nav > p");
 const progressElement = document.querySelector(".progress > div");
 const mapElement = document.querySelector("#map");
 const leaderboardElement = document.querySelector("#leaderboard");
+const spinner = document.querySelector("#spinner");
 const socket = io();
 let targetAnnounced = false;
 
@@ -130,6 +131,11 @@ socket.on("solution", (data) => {
 });
 
 socket.on("game-metadata", (data) => {
+  spinner.style.opacity = 0;
+  setTimeout(() => {
+    spinner.style.display = "none";
+  }, 750);
+
   console.log("Connected to game!", data);
   guessingTime = data.guess_time;
 });
