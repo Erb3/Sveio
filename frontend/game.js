@@ -107,10 +107,13 @@ socket.on("solution", (data) => {
 
   for (const [sid, guess] of Object.entries(data.guesses)) {
     if (sid === socket.id) continue;
+
     console.log("Adding someone elses marker", guess, data.guesses, sid);
-    otherPlayerMarkers.push(
-      L.marker([guess.lat, guess.long], { icon: blueMarker }).addTo(map)
-    );
+    const marker = L.marker([guess.lat, guess.long], { icon: blueMarker });
+    marker.addTo(map);
+    console.log(data.leaderboard);
+    marker.bindPopup(data.leaderboard[sid].username).openPopup();
+    otherPlayerMarkers.push(marker);
   }
 
   const leaderboard = [];
