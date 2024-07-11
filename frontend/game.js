@@ -27,8 +27,8 @@ const map = L.map("map", {
   maxZoom: 5,
   scrollWheelZoom: true,
   maxBounds: [
-    [89.9, 160.9],
-    [-89.9, -160.9],
+    [-90, -180],
+    [90, 180],
   ],
   zoomControl: false,
   noWrap: true,

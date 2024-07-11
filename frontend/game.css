@@ -2,7 +2,7 @@ aside {
   width: 13vw;
   padding: 1vw;
   position: absolute;
-  bottom: 0;
+  top: 0;
   right: 0;
   z-index: 999;
   background-color: rgba(0, 0, 0, 0.75);
