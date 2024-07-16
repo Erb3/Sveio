@@ -8,8 +8,9 @@ let targetAnnounced = false;
 
 function createMarkerIcon(color) {
   return L.icon({
-    iconUrl: "/assets/marker-icon-" + color + ".png",
-    shadowUrl: "/assets/marker-shadow.png",
+    iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${color}.png`,
+    shadowUrl:
+      "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
