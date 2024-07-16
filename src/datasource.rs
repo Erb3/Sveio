@@ -19,7 +19,7 @@ impl City {
 	}
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct AnonymizedCity {
 	pub country: String,
 	pub name: String,
@@ -56,10 +56,23 @@ mod tests {
 
 		// Check if both the first and second city in the datasources matches
 		// If it does, this suggests that the cities are not randomized
-		assert!(
-			datasource1.cities.get(0).unwrap().name != datasource2.cities.get(0).unwrap().name
-				&& (datasource1.cities.get(1).unwrap().name
-					!= datasource2.cities.get(1).unwrap().name)
+		assert_ne!(
+			datasource1.cities.get(0).unwrap().name,
+			datasource2.cities.get(0).unwrap().name
 		);
+		assert_ne!(
+			datasource1.cities.get(1).unwrap().latitude,
+			datasource2.cities.get(1).unwrap().latitude
+		)
+	}
+
+	#[tokio::test]
+	async fn can_anonymize_city() {
+		let datasource = Datasource::new().await;
+		let city = datasource.cities.get(0).unwrap();
+		let anonymized = city.clone().anonymize();
+
+		assert_eq!(city.name, anonymized.name);
+		assert_eq!(city.country, anonymized.country);
 	}
 }
