@@ -1,7 +1,7 @@
 use clap::{command, Parser};
 
 #[derive(clap::ValueEnum, Clone, Debug)]
-pub enum LoggingLevel {
+pub(crate) enum LoggingLevel {
 	Trace,
 	Debug,
 	Info,
@@ -25,25 +25,25 @@ impl From<LoggingLevel> for tracing_subscriber::filter::LevelFilter {
 
 #[derive(Parser)]
 #[command(name = "Sveio", version, about, author)]
-pub struct Cli {
+pub(crate) struct Cli {
 	/// Optional port to use. Default is 8085
 	#[arg(short, long, env = "SVEIO_PORT")]
-	pub port: Option<u32>,
+	pub(crate) port: Option<u32>,
 
 	/// Optional logging level to use. Default is info
 	#[arg(short, long, env = "SVEIO_LOGGING_LEVEL")]
-	pub logging: Option<LoggingLevel>,
+	pub(crate) logging: Option<LoggingLevel>,
 
 	/// Optional amount of seconds to allow guessing. Default is 7s
 	#[arg(long, env = "SVEIO_GUESS_TIME")]
-	pub guess_time: Option<u64>,
+	pub(crate) guess_time: Option<u64>,
 
 	/// Optional amount of seconds where players can see where the others
 	/// guessed. Default is 3s
 	#[arg(long, env = "SVEIO_SHOWCASE_TIME")]
-	pub showcase_time: Option<u64>,
+	pub(crate) showcase_time: Option<u64>,
 }
 
-pub fn get_settings() -> Cli {
+pub(crate) fn get_settings() -> Cli {
 	Cli::parse()
 }

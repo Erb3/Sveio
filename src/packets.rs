@@ -2,31 +2,31 @@ use crate::{datasource, state};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct GuessPacket {
-	pub lat: f32,
-	pub long: f32,
+pub(crate) struct GuessPacket {
+	pub(crate) lat: f32,
+	pub(crate) long: f32,
 }
 
 #[derive(Serialize)]
-pub struct SolutionPacket {
-	pub location: datasource::City,
-	pub guesses: state::GuessMap,
-	pub leaderboard: state::PlayerMap,
+pub(crate) struct SolutionPacket {
+	pub(crate) location: datasource::City,
+	pub(crate) guesses: state::GuessMap,
+	pub(crate) leaderboard: state::PlayerMap,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct JoinMessage {
-	pub game: String,
-	pub username: String,
+pub(crate) struct JoinMessage {
+	pub(crate) game: String,
+	pub(crate) username: String,
 }
 
 #[derive(Serialize, Debug)]
-pub struct GameMetadataMessage {
-	pub guess_time: u64,
-	pub showcase_time: u64,
+pub(crate) struct GameMetadataMessage {
+	pub(crate) guess_time: u64,
+	pub(crate) showcase_time: u64,
 }
 
 #[derive(Serialize, Debug)]
-pub struct DisconnectPacket {
-	pub message: String,
+pub(crate) struct DisconnectPacket {
+	pub(crate) message: String,
 }

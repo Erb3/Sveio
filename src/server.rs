@@ -10,12 +10,12 @@ use tower_http::cors::CorsLayer;
 use tower_http::timeout::TimeoutLayer;
 use tracing::info;
 
-pub struct ServerOptions {
-	pub game: game::GameOptions,
-	pub port: Option<u32>,
+pub(crate) struct ServerOptions {
+	pub(crate) game: game::GameOptions,
+	pub(crate) port: Option<u32>,
 }
 
-pub async fn create_server(opts: ServerOptions) -> Option<axum::Router> {
+pub(crate) async fn create_server(opts: ServerOptions) -> Option<axum::Router> {
 	let socketio_state = state::GameState::new(opts.game.clone());
 
 	let (socketio_layer, io) = SocketIoBuilder::new()
