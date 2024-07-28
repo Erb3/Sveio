@@ -3,15 +3,15 @@ use rand::thread_rng;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Clone)]
-pub struct City {
-	pub name: String,
-	pub country: String,
-	pub latitude: f64,
-	pub longitude: f64,
+pub(crate) struct City {
+	pub(crate) name: String,
+	pub(crate) country: String,
+	pub(crate) latitude: f64,
+	pub(crate) longitude: f64,
 }
 
 impl City {
-	pub fn anonymize(self) -> AnonymizedCity {
+	pub(crate) fn anonymize(self) -> AnonymizedCity {
 		AnonymizedCity {
 			country: self.country,
 			name: self.name,
@@ -20,17 +20,17 @@ impl City {
 }
 
 #[derive(Serialize, Clone)]
-pub struct AnonymizedCity {
-	pub country: String,
-	pub name: String,
+pub(crate) struct AnonymizedCity {
+	pub(crate) country: String,
+	pub(crate) name: String,
 }
 
-pub struct Datasource {
-	pub cities: Vec<City>,
+pub(crate) struct Datasource {
+	pub(crate) cities: Vec<City>,
 }
 
 impl Datasource {
-	pub async fn new() -> Datasource {
+	pub(crate) async fn new() -> Datasource {
 		let mut cities: Vec<City> = serde_json::from_str(include_str!("../cities.json"))
 			.expect("cities.json does not have correct format.");
 

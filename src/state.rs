@@ -9,19 +9,19 @@ use tokio::sync::RwLock;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(transparent)]
-pub struct Username(String);
+pub(crate) struct Username(String);
 
 #[derive(Debug, Clone, Serialize)]
-pub struct Player {
-	pub username: Username,
-	pub score: u64,
+pub(crate) struct Player {
+	pub(crate) username: Username,
+	pub(crate) score: u64,
 
 	#[serde(skip_serializing)]
-	pub last_packet: i64,
+	pub(crate) last_packet: i64,
 }
 
 impl Player {
-	pub fn new(username: String) -> Player {
+	pub(crate) fn new(username: String) -> Player {
 		Player {
 			username: Username(username),
 			score: 0,
@@ -30,18 +30,18 @@ impl Player {
 	}
 }
 
-pub type GuessMap = HashMap<Sid, packets::GuessPacket>;
-pub type PlayerMap = HashMap<Sid, Player>;
+pub(crate) type GuessMap = HashMap<Sid, packets::GuessPacket>;
+pub(crate) type PlayerMap = HashMap<Sid, Player>;
 
 #[derive(Clone)]
-pub struct GameState {
+pub(crate) struct GameState {
 	guesses: Arc<RwLock<GuessMap>>,
 	players: Arc<RwLock<PlayerMap>>,
-	pub options: GameOptions,
+	pub(crate) options: GameOptions,
 }
 
 impl GameState {
-	pub fn new(options: GameOptions) -> GameState {
+	pub(crate) fn new(options: GameOptions) -> GameState {
 		GameState {
 			guesses: Arc::new(RwLock::new(GuessMap::new())),
 			players: Arc::new(RwLock::new(PlayerMap::new())),
@@ -51,29 +51,29 @@ impl GameState {
 
 	// Guesses
 
-	pub async fn get_guesses(&self) -> GuessMap {
+	pub(crate) async fn get_guesses(&self) -> GuessMap {
 		self.guesses.read().await.clone()
 	}
 
-	pub async fn clear_guesses(&self) {
+	pub(crate) async fn clear_guesses(&self) {
 		self.guesses.write().await.clear()
 	}
 
-	pub async fn insert_guess(&self, sid: Sid, guess: packets::GuessPacket) {
+	pub(crate) async fn insert_guess(&self, sid: Sid, guess: packets::GuessPacket) {
 		self.guesses.write().await.insert(sid, guess);
 	}
 
 	// Players
 
-	pub async fn get_players(&self) -> PlayerMap {
+	pub(crate) async fn get_players(&self) -> PlayerMap {
 		self.players.read().await.clone()
 	}
 
-	pub async fn insert_player(&self, sid: Sid, player: Player) {
+	pub(crate) async fn insert_player(&self, sid: Sid, player: Player) {
 		self.players.write().await.insert(sid, player);
 	}
 
-	pub async fn get_player(&self, sid: Sid) -> Option<Player> {
+	pub(crate) async fn get_player(&self, sid: Sid) -> Option<Player> {
 		self.players
 			.read()
 			.await
@@ -81,18 +81,18 @@ impl GameState {
 			.map(|player| player.to_owned())
 	}
 
-	pub async fn remove_player(&self, sid: Sid) {
+	pub(crate) async fn remove_player(&self, sid: Sid) {
 		self.players.write().await.remove(&sid);
 	}
 
-	pub async fn is_username_taken(&self, wanted: String) -> bool {
+	pub(crate) async fn is_username_taken(&self, wanted: String) -> bool {
 		self.get_players()
 			.await
 			.into_iter()
 			.any(|v| v.1.username.0 == wanted)
 	}
 
-	pub async fn update_last_packet(&self, sid: Sid) {
+	pub(crate) async fn update_last_packet(&self, sid: Sid) {
 		let player = self.get_player(sid).await;
 
 		if let Some(mut p) = player {

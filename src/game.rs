@@ -9,12 +9,12 @@ use std::time::Duration;
 use tracing::{debug, info};
 
 #[derive(Clone)]
-pub struct GameOptions {
-	pub guess_time: u64,
-	pub showcase_time: u64,
+pub(crate) struct GameOptions {
+	pub(crate) guess_time: u64,
+	pub(crate) showcase_time: u64,
 }
 
-pub fn on_connect(socket: SocketRef) {
+pub(crate) fn on_connect(socket: SocketRef) {
 	debug!("🆕 Client connected with client id {}", socket.id);
 
 	socket.on(
@@ -88,7 +88,7 @@ pub fn on_connect(socket: SocketRef) {
 	});
 }
 
-pub async fn game_loop(opts: GameOptions, io: Arc<SocketIo>, state: state::GameState) {
+pub(crate) async fn game_loop(opts: GameOptions, io: Arc<SocketIo>, state: state::GameState) {
 	let guessing_time = Duration::from_secs(opts.guess_time);
 	let showcase_time = Duration::from_secs(opts.showcase_time);
 	let mut last_city: Option<datasource::City>;
