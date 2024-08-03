@@ -50,9 +50,8 @@ map.attributionControl.setPosition("bottomleft");
 map.setZoom(3);
 
 const mySelectionMarker = L.marker([0, 0]);
-const goalMarker = L.marker([0, 0], { icon: greenMarker });
 const distanceLine = L.polyline([], { color: "red" });
-const otherPlayerMarkers = [];
+const itemsToRemove = [];
 let canMoveMarker = false;
 let guessingTime = 5;
 
@@ -70,10 +69,9 @@ socket.on("newTarget", (data) => {
   targetAnnounced = true;
   distanceLine.remove();
   mySelectionMarker.remove();
-  goalMarker.remove();
 
-  otherPlayerMarkers.forEach((marker) => {
-    marker.remove();
+  itemsToRemove.forEach((leafletItem) => {
+    leafletItem.remove();
   });
 
   targetElement.innerHTML = `${data.name}, ${data.country}`;
@@ -88,7 +86,7 @@ socket.on("solution", (data) => {
   if (!targetAnnounced) return;
 
   const goalCoords = [data.location.latitude, data.location.longitude];
-  goalMarker.setLatLng(goalCoords).addTo(map);
+  itemsToRemove.push(L.marker(goalCoords, { icon: greenMarker }).addTo(map));
   targetElement.innerHTML = "The target location will appear here";
   progressElement.style.width = "0%";
   progressElement.style.transitionDuration = "1s";
@@ -101,20 +99,25 @@ socket.on("solution", (data) => {
     const distance = Math.round(
       map.distance(mySelectionMarker.getLatLng(), goalCoords) / 1000
     );
-    goalMarker
-      .bindPopup(`Location: ${data.location.name}<br>Distance: ${distance} km`)
-      .openPopup();
+
+    itemsToRemove.push(
+      L.popup(goalCoords, {
+        content: `Location: ${data.location.name}<br>Distance: ${distance} km`,
+      }).openOn(map)
+    );
   }
 
   for (const [sid, guess] of Object.entries(data.guesses)) {
     if (sid === socket.id) continue;
 
-    console.log("Adding someone elses marker", guess, data.guesses, sid);
-    const marker = L.marker([guess.lat, guess.long], { icon: blueMarker });
-    marker.addTo(map);
-    console.log(data.leaderboard);
-    marker.bindPopup(data.leaderboard[sid].username).openPopup();
-    otherPlayerMarkers.push(marker);
+    itemsToRemove.push(
+      L.marker([guess.lat, guess.long], {
+        icon: blueMarker,
+      })
+        .addTo(map)
+        .bindPopup(data.leaderboard[sid].username, { autoClose: false })
+        .openPopup()
+    );
   }
 
   const leaderboard = [];
@@ -147,7 +150,8 @@ socket.on("kick", (data) => {
 
 socket.on("connect", () => {
   socket.emit("join", {
-    username: localStorage.getItem("username"),
+    username:
+      sessionStorage.getItem("username") || localStorage.getItem("username"),
     game: "PRIMARY",
   });
 });
