@@ -42,6 +42,15 @@ pub(crate) struct Cli {
 	/// guessed. Default is 3s
 	#[arg(long, env = "SVEIO_SHOWCASE_TIME")]
 	pub(crate) showcase_time: Option<u64>,
+
+	/// Optional boolean deciding if players should be removed to the game
+	/// when the server receives a termination signal. With this enabled,
+	/// shutting down the server will take an additional five seconds
+	/// so that clients can load the error message. For debugging
+	/// reasons this is disabled by default, if you are not running in release.
+	/// If you are running in release, this will be enabled by default.
+	#[arg(long, env = "SVEIO_TERMINATION_KICK")]
+	pub(crate) termination_kick: Option<bool>,
 }
 
 pub(crate) fn get_settings() -> Cli {
