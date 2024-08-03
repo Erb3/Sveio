@@ -52,7 +52,6 @@ map.setZoom(3);
 const mySelectionMarker = L.marker([0, 0]);
 const goalMarker = L.marker([0, 0], { icon: greenMarker });
 const distanceLine = L.polyline([], { color: "red" });
-const distancePopup = L.popup();
 const otherPlayerMarkers = [];
 let canMoveMarker = false;
 let guessingTime = 5;
@@ -72,7 +71,6 @@ socket.on("newTarget", (data) => {
   distanceLine.remove();
   mySelectionMarker.remove();
   goalMarker.remove();
-  distancePopup.remove();
 
   otherPlayerMarkers.forEach((marker) => {
     marker.remove();
@@ -103,8 +101,9 @@ socket.on("solution", (data) => {
     const distance = Math.round(
       map.distance(mySelectionMarker.getLatLng(), goalCoords) / 1000
     );
-    distancePopup.setLatLng(goalCoords).setContent(`Distance: ${distance} km`);
-    goalMarker.bindPopup(distancePopup).openPopup();
+    goalMarker
+      .bindPopup(`Location: ${data.location.name}<br>Distance: ${distance} km`)
+      .openPopup();
   }
 
   for (const [sid, guess] of Object.entries(data.guesses)) {
