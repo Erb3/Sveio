@@ -101,7 +101,7 @@
       </div>
     </main>
     <script defer>
-      document.querySelector("input").value = localStorage.getItem("username");
+      document.querySelector("input").value = sessionStorage.getItem("username") || localStorage.getItem("username");
 
       document.querySelector("form").addEventListener("submit", (e) => {
         e.preventDefault();
@@ -110,6 +110,7 @@
           `Player ${Math.floor(Math.random() * 9999)}`;
 
         localStorage.setItem("username", username);
+        sessionStorage.setItem("username", username);
         location.href = "/game";
       });
 
