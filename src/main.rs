@@ -25,6 +25,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 			showcase_time: settings.showcase_time.unwrap_or(3),
 		},
 		port: Some(settings.port.unwrap_or(8085)),
+		server_termination_kick: settings.termination_kick.unwrap_or(!cfg!(debug_assertions)),
 	})
 	.await;
 
@@ -42,6 +43,7 @@ async fn main() -> shuttle_axum::ShuttleAxum {
 			showcase_time: 3,
 		},
 		port: None,
+		server_termination_kick: true,
 	})
 	.await
 	.unwrap()
