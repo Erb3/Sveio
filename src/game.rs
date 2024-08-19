@@ -15,7 +15,7 @@ pub(crate) struct GameOptions {
 }
 
 pub(crate) fn on_connect(socket: SocketRef) {
-	debug!("🆕 Client connected with client id {}", socket.id);
+	debug!("Client connected with client id {}", socket.id);
 
 	socket.on(
 		"join",
@@ -67,7 +67,7 @@ pub(crate) fn on_connect(socket: SocketRef) {
 			socket.join("PRIMARY").unwrap();
 
 			info!(
-				"🪪  Client with ID {} set username to {}",
+				"Client with ID {} set username to {}",
 				socket.id, data.username
 			);
 		},
@@ -76,7 +76,7 @@ pub(crate) fn on_connect(socket: SocketRef) {
 	socket.on(
 		"guess",
 		|socket: SocketRef, Data::<packets::GuessPacket>(data), state: State<state::GameState>| async move {
-			debug!("📬 Received message: {:?}", data);
+			debug!("Received message: {:?}", data);
 			state.insert_guess(socket.id, data).await;
 			state.update_last_packet(socket.id).await;
 		},
@@ -84,7 +84,7 @@ pub(crate) fn on_connect(socket: SocketRef) {
 
 	socket.on_disconnect(|s: SocketRef, state: State<state::GameState>| async move {
 		state.remove_player(s.id).await;
-		debug!("🚪 User {} disconnected.", s.id);
+		debug!("User {} disconnected.", s.id);
 	});
 }
 
@@ -102,7 +102,7 @@ pub(crate) async fn game_loop(opts: GameOptions, io: Arc<SocketIo>, state: state
 			index = 0;
 		}
 
-		debug!("📍 New location: {}, {}", &city.name, &city.country);
+		debug!("New location: {}, {}", &city.name, &city.country);
 		state.clear_guesses().await;
 
 		io.to("PRIMARY")
