@@ -17,7 +17,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 		.with_max_level(settings.logging.unwrap_or(cli::LoggingLevel::Info))
 		.init();
 
-	info!("👋 Sveio says hi!");
+	info!("Sveio says hi!");
 
 	server::create_server(server::ServerOptions {
 		game: game::GameOptions {
@@ -35,7 +35,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 #[cfg(feature = "shuttle")]
 #[shuttle_runtime::main]
 async fn main() -> shuttle_axum::ShuttleAxum {
-	info!("👋 Sveio says hi to Shuttle.rs!");
+	info!("Sveio says hi to Shuttle.rs!");
 
 	Ok(server::create_server(server::ServerOptions {
 		game: game::GameOptions {
