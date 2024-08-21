@@ -42,9 +42,12 @@ cargo shuttle deploy
 
 ## Configuration
 
-The server uses the following environmental variables, and can also be passed as cli args.
-
-- `SVEIO_PORT`: The port to serve on. Defaults to `8085`.
+| Name          | Description                        | Env                   | Flag              | Default |
+| ------------- | ---------------------------------- | --------------------- | ----------------- | ------- |
+| Port          | The HTTP port to listen to         | `SVEIO_PORT`          | `-p`              | 8085    |
+| Logging       | Logging level                      | `SVEIO_LOGGING_LEVEL` | `-l`              | info    |
+| Guess time    | Amount of seconds allowed to guess | `SVEIO_GUESS_TIME`    | `--guess-time`    | 7       |
+| Showcase time | Amount of seconds to show markers  | `SVEIO_SHOWCASE_TIME` | `--showcase-time` | 3       |
 
 For more information please run `sveio -h`.
 
