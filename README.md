@@ -1,7 +1,9 @@
 # Sveio
 
 A geography game inspired by [Posio](https://github.com/abrenaut/posio), written in 🔥🚀Rust.
-View the public instance at [sveio.shuttleapp.rs](https://sveio.shuttleapp.rs)!
+
+> [!NOTE]
+> The public instance has unfortunately been shutdown due to limits by Shuttle, and me not being able to afford a proper host.
 
 ## Deployment
 
@@ -27,17 +29,6 @@ services:
     ports:
       - 8085:8085
     restart: unless-stopped
-```
-
-### Shuttle
-
-[Shuttle.rs](https://shuttle.rs) is supported for the demo server.
-To enable shuttle support use the `shuttle` feature.
-
-Deploy with Shuttle:
-
-```shell
-cargo shuttle deploy
 ```
 
 ## Configuration
