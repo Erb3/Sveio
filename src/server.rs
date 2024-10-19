@@ -12,11 +12,11 @@ use tracing::info;
 
 pub(crate) struct ServerOptions {
 	pub(crate) game: game::GameOptions,
-	pub(crate) port: Option<u32>,
+	pub(crate) port: u32,
 	pub(crate) server_termination_kick: bool,
 }
 
-pub(crate) async fn create_server(opts: ServerOptions) -> Option<axum::Router> {
+pub(crate) async fn start_server(opts: ServerOptions) {
 	let socketio_state = state::GameState::new(opts.game.clone());
 
 	let (socketio_layer, io) = SocketIoBuilder::new()
@@ -60,22 +60,16 @@ pub(crate) async fn create_server(opts: ServerOptions) -> Option<axum::Router> {
 		game::game_loop(opts.game, game_io, socketio_state).await;
 	});
 
-	if let Some(port) = opts.port {
-		info!("Starting HTTP server");
-		let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", port))
-			.await
-			.unwrap();
+	info!("Starting HTTP server");
+	let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", opts.port))
+		.await
+		.unwrap();
 
-		info!("Listening on http://{}", listener.local_addr().unwrap());
-		axum::serve(listener, app)
-			.with_graceful_shutdown(shutdown_signal(shutdown_io, opts.server_termination_kick))
-			.await
-			.unwrap();
-
-		return None;
-	}
-
-	Some(app)
+	info!("Listening on http://{}", listener.local_addr().unwrap());
+	axum::serve(listener, app)
+		.with_graceful_shutdown(shutdown_signal(shutdown_io, opts.server_termination_kick))
+		.await
+		.unwrap();
 }
 
 async fn shutdown_signal(io: Arc<SocketIo>, should_kick: bool) {
