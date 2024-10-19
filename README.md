@@ -2,9 +2,6 @@
 
 A geography game inspired by [Posio](https://github.com/abrenaut/posio), written in 🔥🚀Rust.
 
-> [!NOTE]
-> The public instance has unfortunately been shutdown due to limits by Shuttle, and me not being able to afford a proper host.
-
 ## Deployment
 
 > [!IMPORTANT]
