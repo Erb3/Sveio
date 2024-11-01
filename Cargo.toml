@@ -17,7 +17,7 @@ tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
 tower = "0.5.1"
 geoutils = "0.5.1"
-regex = "1.10.6"
+regex = "1.11.1"
 chrono = "0.4.38"
 memory-serve = "0.6.0"
 clap = { version = "4.5.18", features = ["derive", "env"] }
