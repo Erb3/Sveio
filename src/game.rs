@@ -26,7 +26,7 @@ pub(crate) fn on_connect(socket: SocketRef) {
 				socket
 					.emit(
 						"kick",
-						packets::DisconnectPacket {
+						&packets::DisconnectPacket {
 							message: "Bad username".to_string(),
 						},
 					)
@@ -40,7 +40,7 @@ pub(crate) fn on_connect(socket: SocketRef) {
 				socket
 					.emit(
 						"kick",
-						packets::DisconnectPacket {
+						&packets::DisconnectPacket {
 							message: "Username taken".to_string(),
 						},
 					)
@@ -57,7 +57,7 @@ pub(crate) fn on_connect(socket: SocketRef) {
 			socket
 				.emit(
 					"game-metadata",
-					packets::GameMetadataMessage {
+					&packets::GameMetadataMessage {
 						guess_time: state.options.guess_time,
 						showcase_time: state.options.showcase_time,
 					},
@@ -106,7 +106,7 @@ pub(crate) async fn game_loop(opts: GameOptions, io: Arc<SocketIo>, state: state
 		state.clear_guesses().await;
 
 		io.to("PRIMARY")
-			.emit("newTarget", city.clone().anonymize())
+			.emit("newTarget", &city.clone().anonymize())
 			.expect("Unable to broadcast new target");
 
 		last_city = Some(city.to_owned());
@@ -117,7 +117,7 @@ pub(crate) async fn game_loop(opts: GameOptions, io: Arc<SocketIo>, state: state
 					socket
 						.emit(
 							"kick",
-							packets::DisconnectPacket {
+							&packets::DisconnectPacket {
 								message: "Automatically removed due to inactivity".to_string(),
 							},
 						)
@@ -146,7 +146,7 @@ pub(crate) async fn game_loop(opts: GameOptions, io: Arc<SocketIo>, state: state
 				}
 			}
 
-			let solution = packets::SolutionPacket {
+			let solution = &packets::SolutionPacket {
 				location: city,
 				guesses: state.get_guesses().await,
 				leaderboard: state.get_players().await,

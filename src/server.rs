@@ -101,7 +101,7 @@ async fn shutdown_signal(io: Arc<SocketIo>, should_kick: bool) {
 			socket
 				.emit(
 					"kick",
-					packets::DisconnectPacket {
+					&packets::DisconnectPacket {
 						message: "Server going down".to_string(),
 					},
 				)
