@@ -6,7 +6,7 @@ authors = ["Erb3"]
 description = "A multiplayer geography game inspired by Posio"
 
 [dependencies]
-socketioxide = {version = "0.15.0", features=["extensions", "state"]}
+socketioxide = {version = "0.15.1", features=["extensions", "state"]}
 tokio = {version = "1.41.0", features=["full"]}
 tower-http = {version = "0.6.1", features=["cors", "fs", "timeout"]}
 serde = {version = "1.0.214", features=["derive"]}
