@@ -20,7 +20,7 @@ geoutils = "0.5.1"
 regex = "1.11.1"
 chrono = "0.4.38"
 memory-serve = "0.6.0"
-clap = { version = "4.5.20", features = ["derive", "env"] }
+clap = { version = "4.5.21", features = ["derive", "env"] }
 
 [profile.release]
 codegen-units = 1
