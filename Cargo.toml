@@ -11,7 +11,7 @@ tokio = {version = "1.41.0", features=["full"]}
 tower-http = {version = "0.6.2", features=["cors", "fs", "timeout"]}
 serde = {version = "1.0.217", features=["derive"]}
 rand = {version = "0.8.5", features=["std_rng"]}
-axum = "0.7.7"
+axum = "0.7.9"
 serde_json = "1.0.133"
 tracing = "0.1.41"
 tracing-subscriber = "0.3.18"
